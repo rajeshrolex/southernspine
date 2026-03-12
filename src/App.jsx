@@ -10,6 +10,9 @@ import AppLayout from './components/layout/AppLayout';
 import Login    from './pages/auth/Login';
 import Register from './pages/auth/Register';
 
+// Components
+import ScrollToTop from './components/common/ScrollToTop';
+
 // Patient pages
 import PatientDashboard  from './pages/patient/PatientDashboard';
 import Appointments      from './pages/patient/Appointments';
@@ -49,6 +52,7 @@ export default function App() {
 
   return (
     <>
+      <ScrollToTop />
       <Toaster
         position="top-right"
         toastOptions={{
