@@ -3,14 +3,22 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { FiArrowLeft, FiPhone, FiMail, FiCalendar, FiFileText, FiUpload, FiActivity } from 'react-icons/fi';
 import { ALL_PATIENTS, PATIENT_APPOINTMENTS, PATIENT_REPORTS } from '../../data/mockData';
 import { StatusBadge } from '../../components/ui/index';
+import ClinicalForm from '../../components/forms/ClinicalForm';
 
 export default function PatientDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [showClinicalForm, setShowClinicalForm] = React.useState(false);
   const patient = ALL_PATIENTS.find(p => p.id === id) || ALL_PATIENTS[0];
 
   return (
-    <div className="space-y-6 animate-fade-in-up max-w-4xl">
+    <div className="space-y-6 animate-fade-in-up max-w-4xl relative">
+      {showClinicalForm && (
+        <ClinicalForm 
+          patient={patient} 
+          onClose={() => setShowClinicalForm(false)} 
+        />
+      )}
       {/* Back */}
       <button onClick={() => navigate('/doctor/patients')} className="flex items-center gap-2 text-slate-600 hover:text-primary-600 font-medium transition-colors">
         <FiArrowLeft className="w-5 h-5" /> Back to Patients
@@ -33,7 +41,10 @@ export default function PatientDetails() {
           </div>
         </div>
         <div className="flex flex-col gap-2">
-          <button onClick={() => navigate('/doctor/upload-report')} className="btn-primary text-sm py-2 px-4">
+          <button onClick={() => setShowClinicalForm(true)} className="btn-primary text-sm py-2 px-4 shadow-lg shadow-primary-100 flex items-center justify-center gap-2">
+            <FiFileText className="w-4 h-4" /> Add Clinical Record
+          </button>
+          <button onClick={() => navigate('/doctor/upload-report')} className="btn-secondary text-sm py-2 px-4 border border-slate-200">
             <FiUpload className="w-4 h-4" /> Upload Report
           </button>
         </div>
