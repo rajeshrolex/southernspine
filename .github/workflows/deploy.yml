@@ -32,16 +32,18 @@ jobs:
           echo "VITE_API_URL=https://u882069120.green-starling-853859.hostingersite.com/api" > .env
           npm run build
 
-      - name: 📡 SFTP Upload Frontend → /public_html/
-        uses: wlixcc/SFTP-Deploy-Action@v1.2.4
+      - name: 📡 FTP Upload Frontend → /public_html/
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
-          username: u882069120
           server: 145.79.213.144
-          password: ${{ secrets.FTP_PASSWORD }}
-          port: 65002
-          local_path: './dist/*'
-          remote_path: '/public_html/'
-          delete_remote_files: false
+          username: u882069120.green-starling-853859.hostingersite.com
+          password: Sandanithin@2026
+          local-dir: ./dist/
+          server-dir: /public_html/
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
 
   # ══════════════════════════════════════════════════════════════════════
   # JOB 2 – Install & Deploy PHP Backend
@@ -88,13 +90,17 @@ jobs:
           SMTP_PASS=Sandanithin@2026
           ENVEOF
 
-      - name: 📡 SFTP Upload Backend → /public_html/api/
-        uses: wlixcc/SFTP-Deploy-Action@v1.2.4
+      - name: 📡 FTP Upload Backend → /public_html/api/
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
-          username: u882069120
           server: 145.79.213.144
-          password: ${{ secrets.FTP_PASSWORD }}
-          port: 65002
-          local_path: './backend/*'
-          remote_path: '/public_html/api/'
-          delete_remote_files: false
+          username: u882069120.green-starling-853859.hostingersite.com
+          password: Sandanithin@2026
+          local-dir: ./backend/
+          server-dir: /public_html/api/
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+            **/*.log
+            **/test-*.php
