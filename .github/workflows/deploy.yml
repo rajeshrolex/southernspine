@@ -13,25 +13,35 @@ jobs:
       - name: 🚚 Get latest code
         uses: actions/checkout@v4
 
+      - name: 🛠️ Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, pdo, pdo_mysql
+
       - name: 🛠️ Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
 
-      - name: 📦 Install dependencies
+      - name: 📦 Install Frontend Dependencies
         run: npm install
 
       - name: 🚀 Build Frontend
         run: npm run build
 
-      - name: 📂 Sync Files via FTP
+      - name: 📦 Install Backend Dependencies
+        working-directory: ./backend
+        run: composer install --no-dev --optimize-autoloader
+
+      - name: 📂 Sync Frontend via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           server-dir: /public_html/
-          local-dir: ./dist/ # Deploying frontend build
+          local-dir: ./dist/
 
       - name: 📂 Sync Backend via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
@@ -39,10 +49,10 @@ jobs:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          server-dir: /public_html/api/ # Assuming backend goes to /api
+          server-dir: /public_html/api/
           local-dir: ./backend/
           exclude: |
             **/node_modules/**
-            **/vendor/**
             .env
             .git*
+            tests/**
