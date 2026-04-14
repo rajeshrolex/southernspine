@@ -1,4 +1,4 @@
-name: Deploy to Hostinger
+name: Deploy to Hostinger (SFTP)
 
 on:
   push:
@@ -34,25 +34,22 @@ jobs:
         working-directory: ./backend
         run: composer install --no-dev --optimize-autoloader
 
-      - name: 📂 Sync Frontend via FTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-        with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          server-dir: /public_html/
-          local-dir: ./dist/
+      - name: 🚀 Prepare for Deployment
+        run: |
+          mkdir -p deploy/api
+          cp -r dist/* deploy/
+          cp -r backend/* deploy/api/
+          # Remove local config and sensitive data from deploy
+          rm -f deploy/api/.env
+          rm -rf deploy/api/tests
 
-      - name: 📂 Sync Backend via FTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      - name: 📂 Sync to Server via SFTP
+        uses: wlixcc/SFTP-Deploy-Action@v1.2.4
         with:
-          server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
+          server: ${{ secrets.FTP_SERVER }}
           password: ${{ secrets.FTP_PASSWORD }}
-          server-dir: /public_html/api/
-          local-dir: ./backend/
-          exclude: |
-            **/node_modules/**
-            .env
-            .git*
-            tests/**
+          port: 22
+          local_path: './deploy/*'
+          remote_path: '/public_html/'
+          delete_remote_files: false
