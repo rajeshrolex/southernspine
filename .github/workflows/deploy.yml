@@ -1,55 +1,106 @@
-name: Deploy to Hostinger (SFTP)
+name: 🚀 Deploy Full Stack (Southern Spine)
 
 on:
   push:
     branches:
       - main
+  workflow_dispatch:
 
 jobs:
-  web-deploy:
-    name: 🎉 Deploy
+  # ══════════════════════════════════════════════════════════════════════
+  # JOB 1 – Build & Deploy React Frontend
+  # ══════════════════════════════════════════════════════════════════════
+  deploy-frontend:
+    name: 🌐 Build & Deploy Frontend
     runs-on: ubuntu-latest
+
     steps:
-      - name: 🚚 Get latest code
+      - name: 📥 Checkout Repository
         uses: actions/checkout@v4
 
-      - name: 🛠️ Set up PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.2'
-          extensions: mbstring, pdo, pdo_mysql
-
-      - name: 🛠️ Set up Node.js
+      - name: ⚙️ Setup Node.js 20
         uses: actions/setup-node@v4
         with:
           node-version: '20'
+          cache: 'npm'
 
-      - name: 📦 Install Frontend Dependencies
-        run: npm install
+      - name: 📦 Install npm Dependencies
+        run: npm ci
 
-      - name: 🚀 Build Frontend
-        run: npm run build
-
-      - name: 📦 Install Backend Dependencies
-        working-directory: ./backend
-        run: composer install --no-dev --optimize-autoloader
-
-      - name: 🚀 Prepare for Deployment
+      - name: 🏗️ Build Frontend
         run: |
-          mkdir -p deploy/api
-          cp -r dist/* deploy/
-          cp -r backend/* deploy/api/
-          # Remove local config and sensitive data from deploy
-          rm -f deploy/api/.env
-          rm -rf deploy/api/tests
+          echo "VITE_API_URL=https://u882069120.green-starling-853859.hostingersite.com/api" > .env
+          npm run build
 
-      - name: 📂 Sync to Server via SFTP
-        uses: wlixcc/SFTP-Deploy-Action@v1.2.4
+      - name: 📡 FTP Upload Frontend → /public_html/
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
-          username: ${{ secrets.FTP_USERNAME }}
-          server: ${{ secrets.FTP_SERVER }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          port: 65002  # Hostinger standard SFTP port for shared hosting
-          local_path: './deploy/*'
-          remote_path: '/public_html/'
-          delete_remote_files: false
+          server: 145.79.213.144
+          username: u882069120
+          password: Sandanithin@2026
+          local-dir: ./dist/
+          server-dir: /public_html/
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+
+  # ══════════════════════════════════════════════════════════════════════
+  # JOB 2 – Install & Deploy PHP Backend
+  # ══════════════════════════════════════════════════════════════════════
+  deploy-backend:
+    name: 🐘 Deploy PHP Backend
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: 🐘 Setup PHP 8.2
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          tools: composer:v2
+
+      - name: 📦 Composer Install (no-dev, optimized)
+        working-directory: backend
+        run: |
+          composer install \
+            --no-dev \
+            --optimize-autoloader \
+            --no-interaction \
+            --prefer-dist
+
+      - name: 🔧 Create production .env
+        working-directory: backend
+        run: |
+          cat > .env << 'ENVEOF'
+          DB_HOST=localhost
+          DB_PORT=3306
+          DB_NAME=u882069120_southernspine
+          DB_USER=u882069120_southernspine
+          DB_PASS=Sandanithin@2026
+          APP_ENV=production
+          BASE_URL=https://u882069120.green-starling-853859.hostingersite.com
+          JWT_SECRET=southern_spine_secure_jwt_secret_2026
+          JWT_EXPIRY=86400
+          SMTP_HOST=smtp.hostinger.com
+          SMTP_PORT=465
+          SMTP_USER=info@southernspine.com
+          SMTP_PASS=Sandanithin@2026
+          ENVEOF
+
+      - name: 📡 FTP Upload Backend → /public_html/api/
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: 145.79.213.144
+          username: u882069120
+          password: Sandanithin@2026
+          local-dir: ./backend/
+          server-dir: /public_html/api/
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+            **/*.log
+            **/test-*.php
