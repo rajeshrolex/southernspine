@@ -2,7 +2,7 @@ import React from 'react';
 
 export default function AssessmentHeader() {
   return (
-    <div className="border-b-2 border-primary-500 pb-6 mb-8">
+    <div className="border-b-2 border-primary-500 pb-4 mb-4">
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div className="flex items-center gap-4">
           <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center p-2">

@@ -25,7 +25,6 @@ export default function Clinics() {
   return (
     <div className="space-y-6 animate-fade-in-up">
       <PageHeader
-        title="Clinics"
         subtitle={`${clinics.length} clinic locations`}
         action={
           <button onClick={() => setModalOpen(true)} className="btn-primary">
@@ -59,7 +58,7 @@ export default function Clinics() {
                 <FiEdit2 className="w-3.5 h-3.5" /> Edit
               </button>
               <button onClick={() => handleDelete(clinic.id)} className="flex-1 flex items-center justify-center gap-1 py-2 rounded-lg text-red-500 bg-red-50 hover:bg-red-100 text-sm font-semibold transition-colors">
-                <FiTrash2 className="w-3.5 h-3.5" /> Delete
+                <FiTrash2 className="w-3.5 h-3.5" /> Remove
               </button>
             </div>
           </div>

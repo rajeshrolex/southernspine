@@ -45,7 +45,7 @@ const MONTHLY_PATIENTS = {
 export default function Analytics() {
   return (
     <div className="space-y-6 animate-fade-in-up">
-      <PageHeader title="Analytics" subtitle="Revenue, appointments & patient trends" />
+      <PageHeader subtitle="Revenue, appointments & patient trends" />
 
       {/* Top stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">

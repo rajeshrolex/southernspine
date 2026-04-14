@@ -23,9 +23,11 @@ export default function AdminDashboard() {
 
   return (
     <div className="space-y-6 animate-fade-in-up">
-      <div>
-        <h2 className="text-2xl font-bold text-slate-900">Admin Overview</h2>
-        <p className="text-slate-500 mt-1">Southern Spine Clinic – March 2026</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-sm font-semibold text-primary-600 uppercase tracking-wider">Health Network Overview</p>
+          <p className="text-xs text-slate-400 mt-1">Live updates for March 2026</p>
+        </div>
       </div>
 
       {/* Stats */}

@@ -30,7 +30,6 @@ export default function Doctors() {
   return (
     <div className="space-y-6 animate-fade-in-up">
       <PageHeader
-        title="Doctors"
         subtitle={`${doctors.length} medical staff members`}
         action={<button onClick={() => setModalOpen(true)} className="btn-primary"><FiPlus className="w-4 h-4" /> Add Doctor</button>}
       />

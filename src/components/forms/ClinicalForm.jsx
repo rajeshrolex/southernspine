@@ -61,8 +61,8 @@ export default function ClinicalForm({ patient, onClose }) {
   const ActiveComponent = steps[activeStep].component;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-0 md:p-4 bg-slate-900/60 backdrop-blur-md overflow-y-auto">
-      <div className="relative w-full max-w-5xl bg-white md:rounded-[40px] shadow-2xl overflow-hidden flex flex-col min-h-screen md:min-h-0 md:max-h-[95vh] animate-scale-in">
+    <div className="fixed inset-0 z-50 flex flex-col bg-white overflow-hidden animate-fade-in-up">
+      <div className="relative w-full h-full flex flex-col overflow-hidden">
         {/* Sticky Header */}
         <div className="flex items-center justify-between px-8 py-6 border-b border-slate-100 bg-white/80 backdrop-blur-md sticky top-0 z-10">
           <div className="flex items-center gap-4">
@@ -122,7 +122,7 @@ export default function ClinicalForm({ patient, onClose }) {
 
         {/* Form Content */}
         <div className="flex-1 overflow-y-auto p-8 md:p-12 scroll-smooth custom-scrollbar">
-          <div className="max-w-4xl mx-auto space-y-12 pb-20">
+          <div className="max-w-6xl mx-auto space-y-8 pb-20">
             {/* Always show header in PDF/Print or as first section */}
             <AssessmentHeader />
             

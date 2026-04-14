@@ -24,7 +24,6 @@ export default function AdminPatients() {
   return (
     <div className="space-y-6 animate-fade-in-up">
       <PageHeader
-        title="All Patients"
         subtitle={`${ALL_PATIENTS.length} registered patients`}
         action={
           <div className="flex gap-2">
