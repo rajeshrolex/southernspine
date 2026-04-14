@@ -1,19 +1,39 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FiCalendar, FiFilter, FiSearch } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
-import { PATIENT_APPOINTMENTS } from '../../data/mockData';
+import api from '../../services/api';
 import { StatusBadge, PageHeader, EmptyState } from '../../components/ui/index';
+import toast from 'react-hot-toast';
 
 export default function Appointments() {
   const navigate = useNavigate();
+  const [appointments, setAppointments] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
   const [search, setSearch] = useState('');
 
-  const filtered = PATIENT_APPOINTMENTS.filter(a => {
+  useEffect(() => {
+    const fetchAppointments = async () => {
+      try {
+        const response = await api.get('/api/appointments/list.php');
+        setAppointments(response.data);
+      } catch (error) {
+        toast.error('Failed to load appointments');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchAppointments();
+  }, []);
+
+  const filtered = appointments.filter(a => {
     const matchStatus = filter === 'all' || a.status === filter;
-    const matchSearch = a.doctor.toLowerCase().includes(search.toLowerCase()) || a.type.toLowerCase().includes(search.toLowerCase());
+    const matchSearch = (a.doctor_name || '').toLowerCase().includes(search.toLowerCase()) || 
+                      (a.type || '').toLowerCase().includes(search.toLowerCase());
     return matchStatus && matchSearch;
   });
+
+  if (loading) return <div className="p-8 text-center text-slate-500">Loading appointments...</div>;
 
   return (
     <div className="space-y-6 animate-fade-in-up">
@@ -75,11 +95,11 @@ export default function Appointments() {
                   <span className="font-bold text-slate-900">{appt.type}</span>
                   <StatusBadge status={appt.status} />
                 </div>
-                <div className="text-sm text-slate-600">{appt.doctor} · {appt.specialty}</div>
+                <div className="text-sm text-slate-600">{appt.doctor_name} · {appt.specialty}</div>
                 <div className="text-sm text-slate-400 mt-1 flex items-center gap-3">
-                  <span>📅 {new Date(appt.date).toLocaleDateString('en-AU', { weekday:'short', day:'numeric', month:'long' })}</span>
-                  <span>🕐 {appt.time}</span>
-                  <span>📍 {appt.location}</span>
+                  <span>📅 {new Date(appt.appointment_date).toLocaleDateString('en-AU', { weekday:'short', day:'numeric', month:'long' })}</span>
+                  <span>🕐 {appt.appointment_time}</span>
+                  <span>📍 {appt.location || 'TBA'}</span>
                 </div>
               </div>
               <div className="flex-shrink-0">
@@ -89,7 +109,7 @@ export default function Appointments() {
                   </button>
                 )}
                 {appt.status === 'completed' && (
-                  <button className="btn-secondary text-sm py-2 px-4">
+                  <button className="btn-secondary text-sm py-2 px-4" onClick={() => navigate('/patient/book-appointment')}>
                     Rebook
                   </button>
                 )}

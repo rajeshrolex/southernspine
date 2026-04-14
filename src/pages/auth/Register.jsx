@@ -1,22 +1,46 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
+import api from '../../services/api';
 import { FiHeart, FiUser, FiMail, FiLock, FiPhone, FiArrowRight, FiArrowLeft } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 
 export default function Register() {
   const [step, setStep] = useState(1);
-  const [form, setForm] = useState({ name: '', email: '', phone: '', dob: '', gender: '', password: '' });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [form, setForm] = useState({ name: '', email: '', phone: '', dob: '', gender: '', password: '', confirmPassword: '' });
   const navigate = useNavigate();
-  const { login } = useAuth();
 
   const update = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    login('patient');
-    toast.success('Account created! Welcome to Southern Spine.');
-    navigate('/patient/dashboard');
+    
+    if (form.password !== form.confirmPassword) {
+      toast.error('Passwords do not match');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const response = await api.post('/auth/register.php', {
+        name: form.name,
+        email: form.email,
+        phone: form.phone,
+        password: form.password,
+        role: 'patient'
+      });
+
+      const { token, user: userData } = response.data;
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(userData));
+      
+      toast.success('Account created! Welcome to Southern Spine.');
+      navigate('/patient/dashboard');
+    } catch (error) {
+      toast.error(error.response?.data?.error || 'Registration failed');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -110,7 +134,7 @@ export default function Register() {
                   <label className="label-lg">Confirm Password</label>
                   <div className="relative">
                     <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
-                    <input className="input pl-12" type="password" placeholder="Repeat your password" required />
+                    <input className="input pl-12" type="password" placeholder="Repeat your password" value={form.confirmPassword} onChange={e => update('confirmPassword', e.target.value)} required />
                   </div>
                 </div>
                 <div className="bg-blue-50 rounded-xl p-4 text-sm text-blue-700 border border-blue-100">
@@ -121,8 +145,8 @@ export default function Register() {
                   <button type="button" onClick={() => setStep(1)} className="btn-outline flex-1 py-4">
                     <FiArrowLeft className="w-5 h-5" /> Back
                   </button>
-                  <button type="submit" className="btn-primary flex-1 py-4 text-lg">
-                    Create Account <FiArrowRight className="w-5 h-5" />
+                  <button type="submit" disabled={isSubmitting} className="btn-primary flex-1 py-4 text-lg disabled:opacity-50">
+                    {isSubmitting ? 'Creating...' : 'Create Account'} <FiArrowRight className="w-5 h-5" />
                   </button>
                 </div>
               </div>

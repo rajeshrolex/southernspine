@@ -1,5 +1,5 @@
-// Auth Context – provides role-based auth simulation
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import api from '../services/api';
 
 const AuthContext = createContext(null);
 
@@ -9,25 +9,50 @@ export const ROLES = {
   ADMIN:   'admin',
 };
 
-const DEMO_USERS = {
-  patient: { id: 'U001', name: 'Anna Sample',     email: 'patient@demo.com', role: 'patient', initials: 'AS', color: 'bg-blue-500' },
-  doctor:  { id: 'D001', name: 'Dr. Sarah Mitchell', email: 'doctor@demo.com',  role: 'doctor',  initials: 'SM', color: 'bg-teal-500' },
-  admin:   { id: 'A001', name: 'Admin User',       email: 'admin@demo.com',   role: 'admin',   initials: 'AU', color: 'bg-purple-500' },
-};
-
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => {
+    const savedUser = localStorage.getItem('user');
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
+  const [loading, setLoading] = useState(true);
 
-  const login = (role) => {
-    setUser(DEMO_USERS[role]);
-    return true;
+  useEffect(() => {
+    // Check if token exists on mount
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setLoading(false);
+      return;
+    }
+    setLoading(false);
+  }, []);
+
+  const login = async (email, password) => {
+    try {
+      const response = await api.post('/auth/login.php', { email, password });
+      const { token, user: userData } = response.data;
+      
+      localStorage.setItem('token', token);
+      localStorage.setItem('user', JSON.stringify(userData));
+      setUser(userData);
+      return { success: true };
+    } catch (error) {
+      console.error('Login error:', error);
+      return { 
+        success: false, 
+        message: error.response?.data?.error || 'Login failed' 
+      };
+    }
   };
 
-  const logout = () => setUser(null);
+  const logout = () => {
+    localStorage.removeItem('token');
+    localStorage.removeItem('user');
+    setUser(null);
+  };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, isAuthenticated: !!user }}>
-      {children}
+    <AuthContext.Provider value={{ user, login, logout, isAuthenticated: !!user, loading }}>
+      {!loading && children}
     </AuthContext.Provider>
   );
 }

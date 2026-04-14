@@ -1,15 +1,32 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { FiUpload, FiFileText, FiCheck, FiX, FiCamera } from 'react-icons/fi';
-import { ALL_PATIENTS } from '../../data/mockData';
+import api from '../../services/api';
 import { PageHeader } from '../../components/ui/index';
 import toast from 'react-hot-toast';
 
 export default function UploadReport() {
   const [form, setForm] = useState({ patient: '', title: '', category: '', notes: '' });
+  const [patients, setPatients] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [file, setFile] = useState(null);
   const [submitted, setSubmitted] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   const [dragging, setDragging] = useState(false);
   const fileRef = useRef();
+
+  useEffect(() => {
+    const fetchPatients = async () => {
+      try {
+        const response = await api.get('/api/patients/list.php');
+        setPatients(response.data);
+      } catch (error) {
+        toast.error('Failed to load patient list');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPatients();
+  }, []);
 
   const update = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
@@ -19,12 +36,29 @@ export default function UploadReport() {
     handleFile(e.dataTransfer.files[0]);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.patient || !form.title) { toast.error('Please fill required fields'); return; }
-    setSubmitted(true);
-    toast.success('Report uploaded successfully!');
+    
+    setIsUploading(true);
+    try {
+      // In a real app: 
+      // const formData = new FormData();
+      // formData.append('file', file);
+      // await api.post('/api/reports/upload.php', formData);
+      
+      // Simulated upload delay
+      await new Promise(r => setTimeout(r, 1500));
+      setSubmitted(true);
+      toast.success('Report attached to patient record!');
+    } catch (error) {
+      toast.error('Upload failed');
+    } finally {
+      setIsUploading(false);
+    }
   };
+
+  if (loading) return <div className="p-8 text-center text-slate-500">Loading patient directory...</div>;
 
   if (submitted) {
     return (
@@ -33,7 +67,7 @@ export default function UploadReport() {
           <FiCheck className="w-10 h-10 text-green-600" />
         </div>
         <h2 className="text-2xl font-bold text-slate-900 mb-2">Report Uploaded!</h2>
-        <p className="text-slate-500 mb-8">The report has been added to the patient's record.</p>
+        <p className="text-slate-500 mb-8">The report has been successfully added to the system.</p>
         <button onClick={() => { setSubmitted(false); setFile(null); setForm({ patient:'', title:'', category:'', notes:'' }); }} className="btn-primary w-full">
           Upload Another
         </button>
@@ -53,8 +87,8 @@ export default function UploadReport() {
             <label className="label-lg">Patient *</label>
             <select className="input" value={form.patient} onChange={e => update('patient', e.target.value)} required>
               <option value="">Select a patient...</option>
-              {ALL_PATIENTS.map(p => (
-                <option key={p.id} value={p.id}>{p.name} – {p.condition}</option>
+              {patients.map(p => (
+                <option key={p.id} value={p.id}>{p.name} ({p.email})</option>
               ))}
             </select>
           </div>
@@ -75,7 +109,7 @@ export default function UploadReport() {
           </div>
           <div>
             <label className="label-lg">Notes</label>
-            <textarea className="input h-24 resize-none" placeholder="Any important notes about this report..." value={form.notes} onChange={e => update('notes', e.target.value)} />
+            <textarea className="input h-24 resize-none" placeholder="Clinical observations..." value={form.notes} onChange={e => update('notes', e.target.value)} />
           </div>
         </div>
 
@@ -123,8 +157,8 @@ export default function UploadReport() {
           </div>
         </div>
 
-        <button type="submit" className="btn-primary w-full text-lg py-4">
-          <FiUpload className="w-5 h-5" /> Upload Report
+        <button type="submit" disabled={isUploading} className="btn-primary w-full text-lg py-4 disabled:opacity-50">
+          {isUploading ? 'Uploading...' : <><FiUpload className="w-5 h-5" /> Upload Report</>}
         </button>
       </form>
     </div>

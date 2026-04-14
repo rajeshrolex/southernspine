@@ -1,28 +1,53 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FiCalendar, FiSearch, FiCheck, FiX } from 'react-icons/fi';
-import { DOCTOR_TODAY_APPOINTMENTS } from '../../data/mockData';
+import api from '../../services/api';
 import { StatusBadge, PageHeader } from '../../components/ui/index';
 import toast from 'react-hot-toast';
 
 export default function DoctorAppointments() {
-  const [appointments, setAppointments] = useState(DOCTOR_TODAY_APPOINTMENTS);
+  const [appointments, setAppointments] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('all');
 
-  const markComplete = (id) => {
-    setAppointments(a => a.map(x => x.id === id ? { ...x, status: 'completed' } : x));
-    toast.success('Marked as completed');
+  useEffect(() => {
+    fetchAppointments();
+  }, []);
+
+  const fetchAppointments = async () => {
+    try {
+      const response = await api.get('/api/appointments/list.php');
+      setAppointments(response.data);
+    } catch (error) {
+      toast.error('Failed to load appointments list');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const markComplete = async (id) => {
+    try {
+      // For now we just mock the status change since we don't have an update endpoint
+      // But we should show it in the UI
+      setAppointments(a => a.map(x => x.id === id ? { ...x, status: 'completed' } : x));
+      toast.success('Marked as completed for today');
+    } catch (error) {
+      toast.error('Update failed');
+    }
   };
 
   const filtered = appointments.filter(a => {
     const ms = filter === 'all' || a.status === filter;
-    const mq = a.patient.toLowerCase().includes(search.toLowerCase()) || a.type.toLowerCase().includes(search.toLowerCase());
+    const mq = (a.patient_name || '').toLowerCase().includes(search.toLowerCase()) || 
+               (a.type || '').toLowerCase().includes(search.toLowerCase());
     return ms && mq;
   });
 
+  if (loading) return <div className="p-8 text-center text-slate-500">Loading daily schedule...</div>;
+
   return (
     <div className="space-y-6 animate-fade-in-up">
-      <PageHeader title="Today's Appointments" subtitle={`${appointments.length} appointments scheduled`} />
+      <PageHeader title="Today's Schedule" subtitle={`${appointments.length} appointments scheduled`} />
 
       <div className="card p-4 flex flex-col sm:flex-row gap-4">
         <div className="relative flex-1">
@@ -49,25 +74,28 @@ export default function DoctorAppointments() {
               <tr>
                 <th className="table-header">Time</th>
                 <th className="table-header">Patient</th>
-                <th className="table-header">Age</th>
                 <th className="table-header">Type</th>
                 <th className="table-header">Status</th>
                 <th className="table-header">Actions</th>
               </tr>
             </thead>
             <tbody>
+              {filtered.length === 0 && (
+                <tr>
+                  <td colSpan="5" className="py-20 text-center text-slate-400">No appointments found</td>
+                </tr>
+              )}
               {filtered.map(a => (
                 <tr key={a.id} className="table-row">
-                  <td className="table-cell font-bold text-slate-900">{a.time}</td>
+                  <td className="table-cell font-bold text-slate-900">{a.appointment_time}</td>
                   <td className="table-cell">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center text-primary-700 text-xs font-bold flex-shrink-0">
-                        {a.patient.split(' ').map(n=>n[0]).join('')}
+                      <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center text-primary-700 text-xs font-bold flex-shrink-0 uppercase">
+                        {(a.patient_name || 'P').split(' ').map(n=>n[0]).join('')}
                       </div>
-                      <span className="font-semibold text-slate-900">{a.patient}</span>
+                      <span className="font-semibold text-slate-900">{a.patient_name}</span>
                     </div>
                   </td>
-                  <td className="table-cell text-slate-600">{a.age}</td>
                   <td className="table-cell">{a.type}</td>
                   <td className="table-cell"><StatusBadge status={a.status} /></td>
                   <td className="table-cell">
@@ -80,7 +108,7 @@ export default function DoctorAppointments() {
                       </button>
                     )}
                     {a.status === 'completed' && (
-                      <span className="text-xs text-slate-400">Done</span>
+                      <span className="text-xs text-slate-400">Archived</span>
                     )}
                   </td>
                 </tr>

@@ -1,37 +1,37 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
+import { useAuth, ROLES } from '../../context/AuthContext';
 import { FiHeart, FiUser, FiLock, FiArrowRight } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 
-const DEMO_ROLES = [
-  { role: 'patient', label: 'Patient', color: 'bg-blue-500',   ring: 'ring-blue-400',   desc: 'Book appointments & view reports' },
-  { role: 'doctor',  label: 'Doctor',  color: 'bg-teal-500',   ring: 'ring-teal-400',   desc: 'Manage patients & schedule' },
-  { role: 'admin',   label: 'Admin',   color: 'bg-purple-500', ring: 'ring-purple-400', desc: 'Full clinic management' },
-];
-
 export default function Login() {
-  const [selectedRole, setSelectedRole] = useState('patient');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    login(selectedRole);
-    toast.success('Welcome back!');
-    if (selectedRole === 'patient') navigate('/patient/dashboard');
-    else if (selectedRole === 'doctor') navigate('/doctor/dashboard');
-    else navigate('/admin/dashboard');
-  };
+    if (!email || !password) {
+      toast.error('Please enter your credentials');
+      return;
+    }
 
-  const handleQuickDemo = (role) => {
-    login(role);
-    toast.success(`Logged in as ${role}`);
-    if (role === 'patient') navigate('/patient/dashboard');
-    else if (role === 'doctor') navigate('/doctor/dashboard');
-    else navigate('/admin/dashboard');
+    setIsSubmitting(true);
+    const result = await login(email, password);
+    setIsSubmitting(false);
+
+    if (result.success) {
+      const savedUser = JSON.parse(localStorage.getItem('user'));
+      toast.success('Welcome back!');
+      
+      if (savedUser.role === ROLES.PATIENT) navigate('/patient/dashboard');
+      else if (savedUser.role === ROLES.DOCTOR) navigate('/doctor/dashboard');
+      else navigate('/admin/dashboard');
+    } else {
+      toast.error(result.message);
+    }
   };
 
   return (
@@ -86,36 +86,6 @@ export default function Login() {
             <p className="text-slate-500">Sign in to your account to continue</p>
           </div>
 
-          {/* Quick demo buttons */}
-          <div className="mb-6">
-            <p className="text-sm font-semibold text-slate-500 text-center mb-3">Quick Demo – Select a role</p>
-            <div className="grid grid-cols-3 gap-3">
-              {DEMO_ROLES.map(r => (
-                <button
-                  key={r.role}
-                  onClick={() => handleQuickDemo(r.role)}
-                  className={`flex flex-col items-center gap-2 p-3 rounded-2xl border-2 transition-all duration-200 ${
-                    selectedRole === r.role
-                      ? 'border-primary-400 bg-primary-50'
-                      : 'border-slate-100 bg-white hover:border-slate-300'
-                  }`}
-                >
-                  <div className={`w-10 h-10 ${r.color} rounded-full flex items-center justify-center text-white text-xs font-bold`}>
-                    {r.label[0]}
-                  </div>
-                  <span className="text-xs font-semibold text-slate-700">{r.label}</span>
-                </button>
-              ))}
-            </div>
-            <p className="text-xs text-center text-slate-400 mt-2">Click a role to instantly demo the portal</p>
-          </div>
-
-          <div className="flex items-center gap-3 my-6">
-            <div className="flex-1 h-px bg-slate-200" />
-            <span className="text-sm text-slate-400">or sign in manually</span>
-            <div className="flex-1 h-px bg-slate-200" />
-          </div>
-
           <form onSubmit={handleLogin} className="space-y-5">
             <div>
               <label className="label-lg">Email Address</label>
@@ -127,6 +97,8 @@ export default function Login() {
                   onChange={e => setEmail(e.target.value)}
                   placeholder="you@example.com"
                   className="input pl-12"
+                  autoComplete="email"
+                  required
                 />
               </div>
             </div>
@@ -140,11 +112,17 @@ export default function Login() {
                   onChange={e => setPassword(e.target.value)}
                   placeholder="••••••••"
                   className="input pl-12"
+                  autoComplete="current-password"
+                  required
                 />
               </div>
             </div>
-            <button type="submit" className="btn-primary w-full py-4 text-lg">
-              Sign In <FiArrowRight className="w-5 h-5" />
+            <button 
+              type="submit" 
+              disabled={isSubmitting}
+              className="btn-primary w-full py-4 text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isSubmitting ? 'Signing In...' : 'Sign In'} <FiArrowRight className="w-5 h-5" />
             </button>
           </form>
 
@@ -152,6 +130,22 @@ export default function Login() {
             New patient?{' '}
             <Link to="/register" className="text-primary-600 font-semibold hover:underline">Create an account</Link>
           </p>
+
+          <div className="mt-8 p-4 bg-slate-50 rounded-xl border border-slate-200">
+            <p className="text-xs font-bold text-slate-500 mb-2 uppercase tracking-wider">Demo Credentials</p>
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              <div className="p-2 bg-white rounded border border-slate-100">
+                <p className="font-semibold text-blue-600">Patient</p>
+                <p>patient@demo.com</p>
+                <p>pass123</p>
+              </div>
+              <div className="p-2 bg-white rounded border border-slate-100">
+                <p className="font-semibold text-teal-600">Doctor</p>
+                <p>doctor@demo.com</p>
+                <p>pass123</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

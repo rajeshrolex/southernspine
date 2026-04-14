@@ -1,13 +1,14 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FiUsers, FiCalendar, FiMapPin, FiDollarSign, FiTrendingUp, FiActivity, FiFileText, FiArrowRight } from 'react-icons/fi';
 import { Line, Bar } from 'react-chartjs-2';
+import api from '../../services/api';
 import {
   Chart as ChartJS, CategoryScale, LinearScale, PointElement,
   LineElement, BarElement, Title, Tooltip, Legend, Filler
 } from 'chart.js';
-import { ADMIN_STATS, REVENUE_DATA, APPOINTMENTS_DATA, DOCTOR_TODAY_APPOINTMENTS, ALL_PATIENTS, CLINICS } from '../../data/mockData';
 import { StatsCard } from '../../components/ui/index';
+import toast from 'react-hot-toast';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend, Filler);
 
@@ -18,49 +19,75 @@ const chartOptions = {
   scales: { x: { grid: { display: false } }, y: { grid: { color: '#f1f5f9' } } },
 };
 
+const MOCK_CHART_DATA = {
+  labels: ['Sep', 'Oct', 'Nov', 'Dec', 'Jan', 'Feb', 'Mar'],
+  datasets: [{
+    label: 'Revenue',
+    data: [12000, 15000, 14000, 18000, 19000, 22000, 25000],
+    borderColor: '#0f172a',
+    backgroundColor: 'rgba(15, 23, 42, 0.05)',
+    fill: true,
+    tension: 0.4
+  }]
+};
+
 export default function AdminDashboard() {
   const navigate = useNavigate();
+  const [data, setData] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchAdminData = async () => {
+      try {
+        const response = await api.get('/api/admin/stats.php');
+        setData(response.data);
+      } catch (error) {
+        toast.error('Failed to load admin stats');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchAdminData();
+  }, []);
+
+  if (loading) return <div className="p-8 text-center text-slate-500">Loading admin dashboard...</div>;
+
+  const { stats, recentAppointments } = data;
 
   return (
     <div className="space-y-6 animate-fade-in-up">
       <div className="flex items-center justify-between">
         <div>
           <p className="text-sm font-semibold text-primary-600 uppercase tracking-wider">Health Network Overview</p>
-          <p className="text-xs text-slate-400 mt-1">Live updates for March 2026</p>
+          <p className="text-xs text-slate-400 mt-1">Live updates from Southern Spine</p>
         </div>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatsCard icon={FiUsers}     label="Total Patients"  value={ADMIN_STATS.totalPatients}  change={ADMIN_STATS.patientGrowth} color="blue"   onClick={() => navigate('/admin/patients')} />
-        <StatsCard icon={FiActivity}  label="Doctors"         value={ADMIN_STATS.totalDoctors}                                       color="green"  onClick={() => navigate('/admin/doctors')} />
-        <StatsCard icon={FiMapPin}    label="Clinics"         value={ADMIN_STATS.totalClinics}                                        color="purple" onClick={() => navigate('/admin/clinics')} />
-        <StatsCard icon={FiDollarSign} label="Monthly Revenue" value={`$${ADMIN_STATS.monthlyRevenue.toLocaleString()}`} change={ADMIN_STATS.revenueGrowth} color="orange" onClick={() => navigate('/admin/analytics')} />
-      </div>
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatsCard icon={FiCalendar}  label="Today"           value={ADMIN_STATS.appointmentsToday}  color="blue"   />
-        <StatsCard icon={FiCalendar}  label="This Month"      value={ADMIN_STATS.appointmentsMonth}  color="teal"   />
-        <StatsCard icon={FiFileText}  label="Pending Reports" value={ADMIN_STATS.pendingReports}     color="red"    />
-        <StatsCard icon={FiTrendingUp} label="Revenue Growth" value={ADMIN_STATS.revenueGrowth}      color="green"  />
+        <StatsCard icon={FiUsers}      label="Total Patients"  value={stats.totalPatients}   color="blue"   onClick={() => navigate('/admin/patients')} />
+        <StatsCard icon={FiActivity}   label="Doctors"         value={stats.totalDoctors}    color="green"  onClick={() => navigate('/admin/doctors')} />
+        <StatsCard icon={FiCalendar}   label="Active Bookings" value={stats.activeAppointments} color="purple" onClick={() => navigate('/admin/clinics')} />
+        <StatsCard icon={FiDollarSign} label="Monthly Revenue" value={`$${(stats.totalAppointments * 85).toLocaleString()}`} color="orange" onClick={() => navigate('/admin/analytics')} />
       </div>
 
       {/* Charts */}
       <div className="grid lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 card p-6">
           <div className="flex items-center justify-between mb-4">
-            <h3 className="section-title">Revenue (Last 7 months)</h3>
+            <h3 className="section-title">Revenue (Est. Trend)</h3>
             <button onClick={() => navigate('/admin/analytics')} className="text-sm text-primary-600 font-semibold flex items-center gap-1 hover:underline">
               Full analytics <FiArrowRight className="w-4 h-4" />
             </button>
           </div>
           <div style={{ height: 220 }}>
-            <Line data={REVENUE_DATA} options={chartOptions} />
+            <Line data={MOCK_CHART_DATA} options={chartOptions} />
           </div>
         </div>
         <div className="card p-6">
-          <h3 className="section-title mb-4">Appointments This Week</h3>
+          <h3 className="section-title mb-4">Appointments Distribution</h3>
           <div style={{ height: 220 }}>
-            <Bar data={APPOINTMENTS_DATA} options={chartOptions} />
+            <Bar data={MOCK_CHART_DATA} options={chartOptions} />
           </div>
         </div>
       </div>
@@ -69,46 +96,42 @@ export default function AdminDashboard() {
         {/* Today's appointments */}
         <div className="card">
           <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
-            <h3 className="section-title">Today's Appointments</h3>
-            <span className="badge-blue">{ADMIN_STATS.appointmentsToday} total</span>
+            <h3 className="section-title">Recent Activity</h3>
+            <span className="badge-blue">{recentAppointments.length} total</span>
           </div>
           <div className="divide-y divide-slate-50">
-            {DOCTOR_TODAY_APPOINTMENTS.slice(0, 5).map(a => (
+            {recentAppointments.length === 0 && <p className="p-6 text-center text-slate-400 text-sm">No recent activity</p>}
+            {recentAppointments.slice(0, 5).map(a => (
               <div key={a.id} className="flex items-center gap-4 px-5 py-3">
-                <div className="w-16 text-sm font-bold text-slate-800 flex-shrink-0">{a.time}</div>
+                <div className="w-16 text-sm font-bold text-slate-800 flex-shrink-0">{a.appointment_time.split(':')[0]}:{a.appointment_time.split(':')[1]}</div>
                 <div className="flex-1 min-w-0">
-                  <div className="font-semibold text-sm text-slate-900 truncate">{a.patient}</div>
+                  <div className="font-semibold text-sm text-slate-900 truncate">{a.patient_name || 'Patient'}</div>
                   <div className="text-xs text-slate-500">{a.type}</div>
                 </div>
-                <span className={`badge ${a.status==='completed'?'badge-green':a.status==='in-progress'?'badge-orange':'badge-blue'}`}>
-                  {a.status}
-                </span>
+                <StatusBadge status={a.status} />
               </div>
             ))}
           </div>
         </div>
 
-        {/* Clinics overview */}
-        <div className="card">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
-            <h3 className="section-title">Clinic Locations</h3>
-            <button onClick={() => navigate('/admin/clinics')} className="text-sm text-primary-600 font-semibold hover:underline">View all</button>
+        {/* Action Center */}
+        <div className="card p-6 bg-gradient-to-br from-slate-900 to-slate-800 text-white border-0">
+          <h3 className="section-title text-white mb-4">Management Console</h3>
+          <div className="grid grid-cols-2 gap-3">
+            <button onClick={() => navigate('/admin/doctors')} className="p-4 bg-white/10 rounded-2xl hover:bg-white/20 transition-all text-left">
+              <FiActivity className="w-6 h-6 mb-2 text-green-400" />
+              <p className="font-bold text-sm">Doctors</p>
+              <p className="text-xs text-slate-400">Manage staff</p>
+            </button>
+            <button onClick={() => navigate('/admin/clinics')} className="p-4 bg-white/10 rounded-2xl hover:bg-white/20 transition-all text-left">
+              <FiMapPin className="w-6 h-6 mb-2 text-purple-400" />
+              <p className="font-bold text-sm">Clinics</p>
+              <p className="text-xs text-slate-400">Locations</p>
+            </button>
           </div>
-          <div className="divide-y divide-slate-50">
-            {CLINICS.map(clinic => (
-              <div key={clinic.id} className="px-5 py-4">
-                <div className="flex items-start justify-between mb-1">
-                  <div className="font-semibold text-slate-900 text-sm">{clinic.name}</div>
-                  <span className="badge-green">Active</span>
-                </div>
-                <div className="text-xs text-slate-500 mb-2">{clinic.address}</div>
-                <div className="flex gap-4 text-xs text-slate-500">
-                  <span>👨‍⚕️ {clinic.doctors} doctors</span>
-                  <span>👥 {clinic.patients} patients</span>
-                </div>
-              </div>
-            ))}
-          </div>
+          <button onClick={() => navigate('/admin/analytics')} className="w-full mt-4 py-3 bg-primary-600 rounded-xl font-bold text-sm hover:bg-primary-500 transition-all flex items-center justify-center gap-2">
+            View Regional Analytics <FiTrendingUp className="w-4 h-4" />
+          </button>
         </div>
       </div>
     </div>

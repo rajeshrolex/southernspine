@@ -1,7 +1,7 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { FiFileText, FiUpload, FiDownload, FiTrash2, FiCamera, FiSearch, FiEye } from 'react-icons/fi';
-import { PATIENT_REPORTS } from '../../data/mockData';
-import { PageHeader, StatusBadge } from '../../components/ui/index';
+import api from '../../services/api';
+import { PageHeader } from '../../components/ui/index';
 import toast from 'react-hot-toast';
 
 const CATEGORY_COLORS = {
@@ -11,24 +11,30 @@ const CATEGORY_COLORS = {
 };
 
 export default function Reports() {
-  const [reports, setReports] = useState(PATIENT_REPORTS);
+  const [reports, setReports] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [dragging, setDragging] = useState(false);
   const fileRef = useRef();
 
+  useEffect(() => {
+    fetchReports();
+  }, []);
+
+  const fetchReports = async () => {
+    try {
+      const response = await api.get('/api/reports/list.php');
+      setReports(response.data);
+    } catch (error) {
+      toast.error('Failed to load reports');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleFile = (file) => {
     if (!file) return;
-    const newReport = {
-      id: `RPT${Date.now()}`,
-      title: file.name.replace(/\.[^/.]+$/, ''),
-      type: 'PDF',
-      date: new Date().toISOString().split('T')[0],
-      uploadedBy: 'You',
-      size: `${(file.size / 1048576).toFixed(1)} MB`,
-      category: 'Progress',
-    };
-    setReports(r => [newReport, ...r]);
-    toast.success('Report uploaded successfully!');
+    toast.error('Cloud storage configuration pending – contact staff for uploads');
   };
 
   const handleDrop = (e) => {
@@ -36,15 +42,12 @@ export default function Reports() {
     handleFile(e.dataTransfer.files[0]);
   };
 
-  const handleDelete = (id) => {
-    setReports(r => r.filter(report => report.id !== id));
-    toast.error('Report deleted');
-  };
-
   const filtered = reports.filter(r =>
-    r.title.toLowerCase().includes(search.toLowerCase()) ||
-    r.category.toLowerCase().includes(search.toLowerCase())
+    (r.title || '').toLowerCase().includes(search.toLowerCase()) ||
+    (r.category || '').toLowerCase().includes(search.toLowerCase())
   );
+
+  if (loading) return <div className="p-8 text-center text-slate-500">Loading reports...</div>;
 
   return (
     <div className="space-y-6 animate-fade-in-up">
@@ -106,10 +109,10 @@ export default function Reports() {
                 </div>
                 <div>
                   <h4 className="font-bold text-slate-900 leading-tight">{report.title}</h4>
-                  <p className="text-xs text-slate-500 mt-1">{report.type} · {report.size}</p>
+                  <p className="text-xs text-slate-500 mt-1">{report.type || 'PDF'} · {report.size || 'N/A'}</p>
                 </div>
                 <div className="text-xs text-slate-400">
-                  By {report.uploadedBy} · {new Date(report.date).toLocaleDateString('en-AU', { day:'numeric', month:'short', year:'numeric' })}
+                  By {report.uploaded_by || 'Clinic'} · {new Date(report.report_date).toLocaleDateString('en-AU', { day:'numeric', month:'short', year:'numeric' })}
                 </div>
                 <div className="flex gap-2 mt-1">
                   <button
@@ -123,12 +126,6 @@ export default function Reports() {
                     className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl bg-slate-50 text-slate-600 text-xs font-semibold hover:bg-slate-100 transition-colors"
                   >
                     <FiEye className="w-3.5 h-3.5" /> View
-                  </button>
-                  <button
-                    onClick={() => handleDelete(report.id)}
-                    className="p-2 rounded-xl bg-red-50 text-red-400 hover:bg-red-100 hover:text-red-600 transition-colors"
-                  >
-                    <FiTrash2 className="w-3.5 h-3.5" />
                   </button>
                 </div>
               </div>
