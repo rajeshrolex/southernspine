@@ -4,6 +4,7 @@ require_once __DIR__ . '/../config/cors.php';
 require_once __DIR__ . '/../helpers/AuthHelper.php';
 
 handleCORS();
+header('Content-Type: application/json');
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
