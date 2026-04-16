@@ -24,18 +24,18 @@ try {
 
     // 3. Appointments
     Database::query("INSERT INTO appointments (patient_id, doctor_name, specialty, appointment_date, appointment_time, type, status, location, notes) VALUES 
-        (?, 'Dr. Sarah Mitchell', 'Physiotherapy', '2026-06-15', '10:30:00', 'Follow-up Session', 'upcoming', 'Melbourne Central', 'Focus on lumbar stability'),
-        (?, 'Dr. Sarah Mitchell', 'Physiotherapy', '2026-06-22', '14:00:00', 'Adjustment', 'upcoming', 'Melbourne Central', ''),
-        (?, 'Dr. Sarah Mitchell', 'Physiotherapy', '2026-05-10', '09:00:00', 'Initial Consultation', 'completed', 'Southbank', 'Patient showing good progress'),
-        (?, 'Dr. Sarah Mitchell', 'Physiotherapy', '2026-05-15', '11:00:00', 'Progress Review', 'completed', 'Southbank', 'Improved mobility in cervical spine')
+        (?, 'Doctor', 'Physiotherapy', '2026-06-15', '10:30:00', 'Follow-up Session', 'upcoming', 'Melbourne Central', 'Focus on lumbar stability'),
+        (?, 'Doctor', 'Physiotherapy', '2026-06-22', '14:00:00', 'Adjustment', 'upcoming', 'Melbourne Central', ''),
+        (?, 'Doctor', 'Physiotherapy', '2026-05-10', '09:00:00', 'Initial Consultation', 'completed', 'Southbank', 'Patient showing good progress'),
+        (?, 'Doctor', 'Physiotherapy', '2026-05-15', '11:00:00', 'Progress Review', 'completed', 'Southbank', 'Improved mobility in cervical spine')
     ", [$patient_id, $patient_id, $patient_id, $patient_id]);
     echo "Appointments seeded.\n";
 
     // 4. Reports
     Database::query("INSERT INTO reports (patient_id, title, type, report_date, uploaded_by, size, category) VALUES 
-        (?, 'Lumbar Spine X-Ray', 'PDF', '2026-05-10', 'Dr. Sarah Mitchell', '2.4 MB', 'Imaging'),
-        (?, 'Exercise Plan Phase 1', 'PDF', '2026-05-11', 'Dr. Sarah Mitchell', '0.8 MB', 'Treatment'),
-        (?, 'Cervical MRI Results', 'PDF', '2026-05-20', 'Dr. Sarah Mitchell', '4.1 MB', 'Imaging')
+        (?, 'Lumbar Spine X-Ray', 'PDF', '2026-05-10', 'Doctor', '2.4 MB', 'Imaging'),
+        (?, 'Exercise Plan Phase 1', 'PDF', '2026-05-11', 'Doctor', '0.8 MB', 'Treatment'),
+        (?, 'Cervical MRI Results', 'PDF', '2026-05-20', 'Doctor', '4.1 MB', 'Imaging')
     ", [$patient_id, $patient_id, $patient_id]);
     echo "Reports seeded.\n";
 

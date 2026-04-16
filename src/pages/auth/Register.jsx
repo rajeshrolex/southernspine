@@ -7,7 +7,17 @@ import toast from 'react-hot-toast';
 export default function Register() {
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [form, setForm] = useState({ name: '', email: '', phone: '', dob: '', gender: '', password: '', confirmPassword: '' });
+  const [form, setForm] = useState({ 
+    name: '', 
+    email: '', 
+    phone: '', 
+    dob: '', 
+    gender: '', 
+    password: '', 
+    confirmPassword: '',
+    role: 'patient',
+    authorization_code: ''
+  });
   const navigate = useNavigate();
 
   const update = (k, v) => setForm(f => ({ ...f, [k]: v }));
@@ -27,7 +37,8 @@ export default function Register() {
         email: form.email,
         phone: form.phone,
         password: form.password,
-        role: 'patient'
+        role: form.role,
+        authorization_code: form.authorization_code
       });
 
       const { token, user: userData } = response.data;
@@ -75,6 +86,24 @@ export default function Register() {
         </div>
 
         <div className="card p-8">
+          {/* Role Selection */}
+          <div className="flex p-1 bg-slate-100 rounded-xl mb-6">
+            <button 
+              type="button" 
+              onClick={() => update('role', 'patient')}
+              className={`flex-1 py-2.5 text-sm font-bold rounded-lg transition-all ${form.role === 'patient' ? 'bg-white text-primary-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+            >
+              Patient
+            </button>
+            <button 
+              type="button" 
+              onClick={() => update('role', 'doctor')}
+              className={`flex-1 py-2.5 text-sm font-bold rounded-lg transition-all ${form.role !== 'patient' ? 'bg-white text-primary-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
+            >
+              Staff / HR
+            </button>
+          </div>
+
           <form onSubmit={handleSubmit}>
             {step === 1 && (
               <div className="space-y-5 animate-fade-in-up">
@@ -137,6 +166,22 @@ export default function Register() {
                     <input className="input pl-12" type="password" placeholder="Repeat your password" value={form.confirmPassword} onChange={e => update('confirmPassword', e.target.value)} required />
                   </div>
                 </div>
+                {form.role !== 'patient' && (
+                  <div className="animate-fade-in-up">
+                    <label className="label-lg text-primary-700">HR Authorization Code</label>
+                    <div className="relative">
+                      <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-primary-400 w-5 h-5" />
+                      <input 
+                        className="input pl-12 border-primary-200 focus:border-primary-500 bg-primary-50/30" 
+                        placeholder="e.g. SS-STAFF-XXXX" 
+                        value={form.authorization_code} 
+                        onChange={e => update('authorization_code', e.target.value)} 
+                        required 
+                      />
+                    </div>
+                    <p className="text-[10px] text-slate-400 mt-1 uppercase tracking-tight">Required for Doctor/Admin accounts</p>
+                  </div>
+                )}
                 <div className="bg-blue-50 rounded-xl p-4 text-sm text-blue-700 border border-blue-100">
                   <strong>👋 Almost done!</strong><br />
                   By creating an account, you agree to our Terms of Service and Privacy Policy.

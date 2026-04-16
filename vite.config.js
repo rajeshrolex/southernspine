@@ -8,7 +8,29 @@ export default defineConfig({
   server: {
     port: 3000,
     open: true,
-    host: true
+    host: true,
+    proxy: {
+      '/api': {
+        target: 'https://green-starling-853859.hostingersite.com',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/auth': {
+        target: 'https://green-starling-853859.hostingersite.com',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/assessments': {
+        target: 'https://green-starling-853859.hostingersite.com',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/products': {
+        target: 'https://green-starling-853859.hostingersite.com',
+        changeOrigin: true,
+        secure: false,
+      }
+    }
   },
   build: {
     outDir: 'dist',

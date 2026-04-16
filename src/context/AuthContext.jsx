@@ -7,6 +7,7 @@ export const ROLES = {
   PATIENT: 'patient',
   DOCTOR:  'doctor',
   ADMIN:   'admin',
+  HR:      'hr',
 };
 
 export function AuthProvider({ children }) {

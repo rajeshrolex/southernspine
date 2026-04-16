@@ -3,7 +3,7 @@
 export const DOCTORS = [
   {
     id: 1,
-    name: 'Dr. Sarah Mitchell',
+    name: 'Doctor',
     specialty: 'Physiotherapy',
     avatar: null,
     initials: 'SM',
@@ -72,7 +72,7 @@ export const APPOINTMENT_TYPES = [
 export const PATIENT_APPOINTMENTS = [
   {
     id: 'APT001',
-    doctor: 'Dr. Sarah Mitchell',
+    doctor: 'Doctor',
     specialty: 'Physiotherapy',
     date: '2026-03-15',
     time: '10:30 AM',
@@ -105,7 +105,7 @@ export const PATIENT_APPOINTMENTS = [
   },
   {
     id: 'APT004',
-    doctor: 'Dr. Sarah Mitchell',
+    doctor: 'Doctor',
     specialty: 'Physiotherapy',
     date: '2026-03-22',
     time: '09:30 AM',
@@ -157,7 +157,7 @@ export const DOCTOR_TODAY_APPOINTMENTS = [
 ];
 
 export const ALL_PATIENTS = [
-  { id: 'P001', name: 'Mary Johnson',    age: 54, phone: '+1 (555) 234-5678', email: 'mary@example.com', lastVisit: '2026-03-10', condition: 'Lower Back Pain', doctor: 'Dr. Sarah Mitchell', status: 'active' },
+  { id: 'P001', name: 'Mary Johnson',    age: 54, phone: '+1 (555) 234-5678', email: 'mary@example.com', lastVisit: '2026-03-10', condition: 'Lower Back Pain', doctor: 'Doctor', status: 'active' },
   { id: 'P002', name: 'Robert Davis',    age: 67, phone: '+1 (555) 345-6789', email: 'robert@example.com', lastVisit: '2026-03-09', condition: 'Neck Pain',       doctor: 'Dr. James Lawson',   status: 'active' },
   { id: 'P003', name: 'Linda Wilson',    age: 42, phone: '+1 (555) 456-7890', email: 'linda@example.com',  lastVisit: '2026-03-11', condition: 'Shoulder Injury', doctor: 'Dr. Sarah Mitchell', status: 'active' },
   { id: 'P004', name: 'John Smith',      age: 38, phone: '+1 (555) 567-8901', email: 'john@example.com',   lastVisit: '2026-02-25', condition: 'Sciatica',        doctor: 'Dr. Anna Chen',      status: 'active' },
@@ -218,8 +218,8 @@ export const CLINICS = [
 
 export const MOCK_USER = {
   id: 'U001',
-  name: 'Anna Sample',
-  email: 'anna@example.com',
+  name: 'Patient',
+  email: 'patient@demo.com',
   phone: '+61 400 000 001',
   dob: '1988-06-15',
   gender: 'Female',

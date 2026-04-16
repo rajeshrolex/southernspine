@@ -52,6 +52,7 @@ export default function Analytics() {
   }, []);
 
   if (loading) return <div className="p-8 text-center text-slate-500">Processing regional analytics...</div>;
+  if (!data || !data.stats) return <div className="p-8 text-center text-red-500">Failed to load analytical data. Please try again later.</div>;
 
   const { stats } = data;
 

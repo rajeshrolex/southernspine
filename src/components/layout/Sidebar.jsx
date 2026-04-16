@@ -4,7 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import {
   FiGrid, FiCalendar, FiUser, FiFileText,
   FiUsers, FiUpload, FiBarChart2, FiMapPin,
-  FiLogOut, FiHeart, FiX
+  FiLogOut, FiHeart, FiX, FiKey
 } from 'react-icons/fi';
 
 const PATIENT_NAV = [
@@ -26,6 +26,7 @@ const ADMIN_NAV = [
   { to: '/admin/doctors',   icon: FiUser,      label: 'Doctors'    },
   { to: '/admin/patients',  icon: FiUsers,     label: 'Patients'   },
   { to: '/admin/analytics', icon: FiBarChart2, label: 'Analytics'  },
+  { to: '/admin/codes',     icon: FiKey,       label: 'Staff Codes' },
 ];
 
 export default function Sidebar({ mobileOpen, onClose }) {
@@ -38,11 +39,13 @@ export default function Sidebar({ mobileOpen, onClose }) {
 
   const navItems =
     user?.role === 'patient' ? PATIENT_NAV :
-    user?.role === 'doctor'  ? DOCTOR_NAV  : ADMIN_NAV;
+    user?.role === 'doctor'  ? DOCTOR_NAV  : 
+    ADMIN_NAV;
 
   const roleLabel =
     user?.role === 'patient' ? 'Patient Portal' :
-    user?.role === 'doctor'  ? 'Doctor Portal'  : 'Admin Panel';
+    user?.role === 'doctor'  ? 'Doctor Portal'  : 
+    'Admin Panel';
 
   const handleLogout = () => { logout(); navigate('/login'); };
 

@@ -10,8 +10,10 @@ try {
         name VARCHAR(100) NOT NULL,
         email VARCHAR(100) UNIQUE NOT NULL,
         password VARCHAR(255) NOT NULL,
-        role ENUM('patient', 'doctor', 'admin') DEFAULT 'patient',
+        role ENUM('patient', 'doctor', 'admin', 'hr') DEFAULT 'patient',
         phone VARCHAR(20),
+        specialty VARCHAR(100),
+        experience VARCHAR(50),
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )");
     echo "Users table created/verified.\n";
@@ -58,15 +60,34 @@ try {
     )");
     echo "Clinics table created.\n";
 
-    // 5. Seed initial demo users if none exist
+    // 5. Staff Authorization Codes Table
+    Database::query("CREATE TABLE IF NOT EXISTS staff_codes (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        code VARCHAR(50) UNIQUE NOT NULL,
+        usage_limit INT DEFAULT 1,
+        times_used INT DEFAULT 0,
+        is_active BOOLEAN DEFAULT TRUE,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )");
+    echo "Staff codes table created.\n";
+
+    // 6. Seed codes if none exist
+    $codeCount = Database::fetchOne("SELECT COUNT(*) as count FROM staff_codes")['count'];
+    if ($codeCount == 0) {
+        Database::query("INSERT INTO staff_codes (code, usage_limit) VALUES ('SS-STAFF-2026', 100)");
+        echo "Default HR code seeded.\n";
+    }
+
+    // 7. Seed initial demo users...
     $userCount = Database::fetchOne("SELECT COUNT(*) as count FROM users")['count'];
     if ($userCount == 0) {
-        $hashedPass = password_hash('pass123', PASSWORD_BCRYPT);
+        $hashedPass = password_hash('test', PASSWORD_BCRYPT);
         Database::query("INSERT INTO users (name, email, password, role) VALUES 
-            ('Anna Sample', 'patient@demo.com', '$hashedPass', 'patient'),
-            ('Dr. Sarah Mitchell', 'doctor@demo.com', '$hashedPass', 'doctor'),
-            ('Admin User', 'admin@demo.com', '$hashedPass', 'admin')");
-        echo "Initial demo users seeded (password: pass123).\n";
+            ('Patient', 'patient@demo.com', '$hashedPass', 'patient'),
+            ('Doctor', 'doctor@demo.com', '$hashedPass', 'doctor'),
+            ('Admin', 'admin@demo.com', '$hashedPass', 'admin'),
+            ('HR Manager', 'hr@demo.com', '$hashedPass', 'hr')");
+        echo "Initial demo users seeded (password: test).\n";
     }
 
     echo "Migration completed successfully!\n";

@@ -9,7 +9,16 @@ export default function Doctors() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
-  const [form, setForm] = useState({ name: '', specialty: '', experience: '' });
+  const [isEditing, setIsEditing] = useState(false);
+  const [selectedId, setSelectedId] = useState(null);
+  const [form, setForm] = useState({ 
+    name: '', 
+    email: '', 
+    phone: '', 
+    specialty: '', 
+    experience: '', 
+    password: '' 
+  });
 
   useEffect(() => {
     fetchDoctors();
@@ -27,11 +36,52 @@ export default function Doctors() {
   };
 
   const handleAdd = () => {
-    toast.error('Direct staff registration requires HR authorization');
+    setIsEditing(false);
+    setSelectedId(null);
+    setForm({ name: '', email: '', phone: '', specialty: '', experience: '', password: '' });
+    setModalOpen(true);
   };
 
-  const handleDelete = (id) => {
-    toast.error('Please contact system administrator to remove medical staff');
+  const handleEdit = (doc) => {
+    setIsEditing(true);
+    setSelectedId(doc.id);
+    setForm({
+      name: doc.name || '',
+      email: doc.email || '',
+      phone: doc.phone || '',
+      specialty: doc.specialty || '',
+      experience: doc.experience || '',
+      password: '' // Don't show password on edit
+    });
+    setModalOpen(true);
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      if (isEditing) {
+        await api.patch('/api/admin/doctors_manage.php', { ...form, id: selectedId });
+        toast.success('Doctor updated successfully');
+      } else {
+        await api.post('/api/admin/doctors_manage.php', form);
+        toast.success('Doctor added successfully');
+      }
+      setModalOpen(false);
+      fetchDoctors();
+    } catch (error) {
+      toast.error(error.response?.data?.error || 'Operation failed');
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm('Are you sure you want to remove this medical staff member?')) return;
+    try {
+      await api.delete(`/api/admin/doctors_manage.php?id=${id}`);
+      toast.success('Doctor removed');
+      fetchDoctors();
+    } catch (error) {
+      toast.error('Failed to remove doctor');
+    }
   };
 
   const filtered = doctors.filter(d =>
@@ -45,7 +95,7 @@ export default function Doctors() {
     <div className="space-y-6 animate-fade-in-up">
       <PageHeader
         subtitle={`${doctors.length} medical staff members`}
-        action={<button onClick={() => setModalOpen(true)} className="btn-primary"><FiPlus className="w-4 h-4" /> Add Doctor</button>}
+        action={<button onClick={handleAdd} className="btn-primary"><FiPlus className="w-4 h-4" /> Add Doctor</button>}
       />
 
       <div className="relative">
@@ -72,7 +122,7 @@ export default function Doctors() {
               <StatusBadge status={doc.available === false ? 'inactive' : 'active'} />
             </div>
             <div className="flex gap-2 pt-2 border-t border-slate-100">
-              <button className="flex-1 flex items-center justify-center gap-1 py-2 rounded-lg text-primary-600 bg-primary-50 hover:bg-primary-100 text-sm font-semibold" onClick={() => toast.error('Editing disabled for demo')}>
+              <button className="flex-1 flex items-center justify-center gap-1 py-2 rounded-lg text-primary-600 bg-primary-50 hover:bg-primary-100 text-sm font-semibold" onClick={() => handleEdit(doc)}>
                 <FiEdit2 className="w-3.5 h-3.5" /> Edit
               </button>
               <button onClick={() => handleDelete(doc.id)} className="flex-1 flex items-center justify-center gap-1 py-2 rounded-lg text-red-500 bg-red-50 hover:bg-red-100 text-sm font-semibold">
@@ -83,14 +133,42 @@ export default function Doctors() {
         ))}
       </div>
 
-      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="Add Doctor">
-        <div className="space-y-4">
-          <p className="text-sm text-slate-500 bg-blue-50 p-3 rounded-xl border border-blue-100">Staff accounts must be provisioned via HR portal.</p>
-          <div className="flex gap-3">
-            <button onClick={() => setModalOpen(false)} className="btn-outline flex-1">Cancel</button>
-            <button onClick={handleAdd} className="btn-primary flex-1">Open HR Portal</button>
+      <Modal open={modalOpen} onClose={() => setModalOpen(false)} title={isEditing ? 'Edit Profile' : 'Add New Doctor'}>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="label">Full Name</label>
+              <input className="input" placeholder="e.g. Dr. John Doe" value={form.name} onChange={e => setForm({...form, name: e.target.value})} required />
+            </div>
+            <div>
+              <label className="label">Specialty</label>
+              <input className="input" placeholder="e.g. Cardiologist" value={form.specialty} onChange={e => setForm({...form, specialty: e.target.value})} required />
+            </div>
+            <div>
+              <label className="label">Experience</label>
+              <input className="input" placeholder="e.g. 12+ years" value={form.experience} onChange={e => setForm({...form, experience: e.target.value})} required />
+            </div>
+            <div>
+              <label className="label">Phone Number</label>
+              <input className="input" placeholder="Contact number" value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} />
+            </div>
+            <div className="md:col-span-2">
+              <label className="label">Email Address</label>
+              <input className="input" type="email" placeholder="doctor@example.com" value={form.email} onChange={e => setForm({...form, email: e.target.value})} required />
+            </div>
+            {!isEditing && (
+              <div className="md:col-span-2">
+                <label className="label">Temporary Password</label>
+                <input className="input" type="password" placeholder="Default: test1234" value={form.password} onChange={e => setForm({...form, password: e.target.value})} />
+              </div>
+            )}
           </div>
-        </div>
+
+          <div className="flex gap-3 pt-4">
+            <button type="button" onClick={() => setModalOpen(false)} className="btn-outline flex-1">Cancel</button>
+            <button type="submit" className="btn-primary flex-1">{isEditing ? 'Save Changes' : 'Create Account'}</button>
+          </div>
+        </form>
       </Modal>
     </div>
   );

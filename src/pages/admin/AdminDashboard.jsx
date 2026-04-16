@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FiUsers, FiCalendar, FiMapPin, FiDollarSign, FiTrendingUp, FiActivity, FiFileText, FiArrowRight } from 'react-icons/fi';
+import { FiUsers, FiCalendar, FiMapPin, FiDollarSign, FiTrendingUp, FiActivity, FiFileText, FiArrowRight, FiKey } from 'react-icons/fi';
 import { Line, Bar } from 'react-chartjs-2';
 import api from '../../services/api';
 import {
   Chart as ChartJS, CategoryScale, LinearScale, PointElement,
   LineElement, BarElement, Title, Tooltip, Legend, Filler
 } from 'chart.js';
-import { StatsCard } from '../../components/ui/index';
+import { StatsCard, StatusBadge } from '../../components/ui/index';
 import toast from 'react-hot-toast';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend, Filler);
@@ -51,6 +51,7 @@ export default function AdminDashboard() {
   }, []);
 
   if (loading) return <div className="p-8 text-center text-slate-500">Loading admin dashboard...</div>;
+  if (!data || !data.stats) return <div className="p-8 text-center text-red-500">Failed to load dashboard data. Please try again later.</div>;
 
   const { stats, recentAppointments } = data;
 
@@ -132,6 +133,14 @@ export default function AdminDashboard() {
           <button onClick={() => navigate('/admin/analytics')} className="w-full mt-4 py-3 bg-primary-600 rounded-xl font-bold text-sm hover:bg-primary-500 transition-all flex items-center justify-center gap-2">
             View Regional Analytics <FiTrendingUp className="w-4 h-4" />
           </button>
+          <div className="card p-5 bg-gradient-to-br from-primary-600 to-indigo-700 text-white border-0">
+            <FiKey className="w-8 h-8 text-primary-200 mb-4" />
+            <h4 className="font-bold underline-offset-4 decoration-primary-300">Staff Access</h4>
+            <p className="text-sm text-primary-100 mt-1 mb-5">Generate security codes for new doctor and admin registration.</p>
+            <button onClick={() => navigate('/admin/codes')} className="btn-secondary w-full py-2.5 text-sm">
+              Manage Codes
+            </button>
+          </div>
         </div>
       </div>
     </div>

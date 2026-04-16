@@ -33,6 +33,7 @@ import Clinics        from './pages/admin/Clinics';
 import Doctors        from './pages/admin/Doctors';
 import AdminPatients  from './pages/admin/AdminPatients';
 import Analytics      from './pages/admin/Analytics';
+import ManageCodes    from './pages/admin/ManageCodes';
 
 /** Route guard – redirects to /login if not authenticated */
 function ProtectedRoute({ children, allowedRole }) {
@@ -76,7 +77,11 @@ export default function App() {
           path="/"
           element={
             user
-              ? <Navigate to={user.role === 'patient' ? '/patient/dashboard' : user.role === 'doctor' ? '/doctor/dashboard' : '/admin/dashboard'} replace />
+              ? <Navigate to={
+                  user.role === 'patient' ? '/patient/dashboard' : 
+                  user.role === 'doctor' ? '/doctor/dashboard' : 
+                  '/admin/dashboard'
+                } replace />
               : <Navigate to="/login" replace />
           }
         />
@@ -134,6 +139,7 @@ export default function App() {
           <Route path="doctors"    element={<Doctors />} />
           <Route path="patients"   element={<AdminPatients />} />
           <Route path="analytics"  element={<Analytics />} />
+          <Route path="codes"      element={<ManageCodes />} />
         </Route>
 
         {/* Catch-all */}

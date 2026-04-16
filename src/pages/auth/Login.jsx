@@ -137,12 +137,17 @@ export default function Login() {
               <div className="p-2 bg-white rounded border border-slate-100">
                 <p className="font-semibold text-blue-600">Patient</p>
                 <p>patient@demo.com</p>
-                <p>pass123</p>
+                <p className="font-mono">test</p>
               </div>
               <div className="p-2 bg-white rounded border border-slate-100">
                 <p className="font-semibold text-teal-600">Doctor</p>
                 <p>doctor@demo.com</p>
-                <p>pass123</p>
+                <p className="font-mono">test</p>
+              </div>
+              <div className="p-2 bg-white rounded border border-slate-100 col-span-2 mt-2">
+                <p className="font-semibold text-purple-600 underline">Admin</p>
+                <p>admin@demo.com</p>
+                <p className="font-mono">test</p>
               </div>
             </div>
           </div>

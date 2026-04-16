@@ -13,16 +13,10 @@ if (!$user) {
 }
 
 try {
-    $query = "SELECT id, name, email, phone FROM users WHERE role = 'doctor' ORDER BY name ASC";
+    $query = "SELECT id, name, email, phone, specialty, experience FROM users WHERE role = 'doctor' ORDER BY name ASC";
     $doctors = Database::fetchAll($query);
     
-    // Add some specialization metadata if it were in the DB (for now hardcoded in response or we can add it to users table)
-    $enriched = array_map(function($d) {
-        $d['specialty'] = 'Health Specialist'; // Placeholder until DB updated
-        return $d;
-    }, $doctors);
-
-    echo json_encode($enriched);
+    echo json_encode($doctors);
 
 } catch (Exception $e) {
     http_response_code(500);
