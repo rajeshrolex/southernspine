@@ -66,10 +66,10 @@ export default function AdminDashboard() {
 
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatsCard icon={FiUsers}      label="Total Patients"  value={stats.totalPatients}   color="blue"   onClick={() => navigate('/admin/patients')} />
-        <StatsCard icon={FiActivity}   label="Doctors"         value={stats.totalDoctors}    color="green"  onClick={() => navigate('/admin/doctors')} />
-        <StatsCard icon={FiCalendar}   label="Active Bookings" value={stats.activeAppointments} color="purple" onClick={() => navigate('/admin/clinics')} />
-        <StatsCard icon={FiDollarSign} label="Monthly Revenue" value={`$${(stats.totalAppointments * 85).toLocaleString()}`} color="orange" onClick={() => navigate('/admin/analytics')} />
+        <StatsCard icon={FiUsers}      label="Total Patients"  value={stats?.totalPatients || 0}   color="blue"   onClick={() => navigate('/admin/patients')} />
+        <StatsCard icon={FiActivity}   label="Doctors"         value={stats?.totalDoctors || 0}    color="green"  onClick={() => navigate('/admin/doctors')} />
+        <StatsCard icon={FiCalendar}   label="Active Bookings" value={stats?.activeAppointments || 0} color="purple" onClick={() => navigate('/admin/clinics')} />
+        <StatsCard icon={FiDollarSign} label="Monthly Revenue" value={`$${((stats?.totalAppointments || 0) * 85).toLocaleString()}`} color="orange" onClick={() => navigate('/admin/analytics')} />
       </div>
 
       {/* Charts */}
@@ -101,17 +101,22 @@ export default function AdminDashboard() {
             <span className="badge-blue">{recentAppointments.length} total</span>
           </div>
           <div className="divide-y divide-slate-50">
-            {recentAppointments.length === 0 && <p className="p-6 text-center text-slate-400 text-sm">No recent activity</p>}
-            {recentAppointments.slice(0, 5).map(a => (
-              <div key={a.id} className="flex items-center gap-4 px-5 py-3">
-                <div className="w-16 text-sm font-bold text-slate-800 flex-shrink-0">{a.appointment_time.split(':')[0]}:{a.appointment_time.split(':')[1]}</div>
-                <div className="flex-1 min-w-0">
-                  <div className="font-semibold text-sm text-slate-900 truncate">{a.patient_name || 'Patient'}</div>
-                  <div className="text-xs text-slate-500">{a.type}</div>
+            {(!recentAppointments || recentAppointments.length === 0) && <p className="p-6 text-center text-slate-400 text-sm">No recent activity</p>}
+            {(recentAppointments || []).slice(0, 5).map((a, i) => {
+              const timeParts = (a.appointment_time || "00:00").split(':');
+              const displayTime = timeParts.length >= 2 ? `${timeParts[0]}:${timeParts[1]}` : (a.appointment_time || '--:--');
+              
+              return (
+                <div key={a.id || i} className="flex items-center gap-4 px-5 py-3">
+                  <div className="w-16 text-sm font-bold text-slate-800 flex-shrink-0">{displayTime}</div>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-semibold text-sm text-slate-900 truncate">{a.patient_name || 'Patient'}</div>
+                    <div className="text-xs text-slate-500">{a.type || 'Appointment'}</div>
+                  </div>
+                  <StatusBadge status={a.status} />
                 </div>
-                <StatusBadge status={a.status} />
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 

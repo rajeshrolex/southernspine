@@ -43,7 +43,8 @@ function ProtectedRoute({ children, allowedRole }) {
     // Redirect to the user's own home
     if (user.role === 'patient') return <Navigate to="/patient/dashboard" replace />;
     if (user.role === 'doctor')  return <Navigate to="/doctor/dashboard"  replace />;
-    return <Navigate to="/admin/dashboard" replace />;
+    // If unknown role, logout and go to login
+    return <Navigate to="/login" replace />;
   }
   return children;
 }
