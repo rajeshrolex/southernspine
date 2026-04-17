@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { FiSave, FiPrinter, FiX, FiCheckCircle, FiChevronRight, FiChevronLeft } from 'react-icons/fi';
+import { FiSave, FiPrinter, FiX, FiCheckCircle, FiChevronRight, FiChevronLeft, FiLoader } from 'react-icons/fi';
 import toast from 'react-hot-toast';
+import api from '../../services/api';
 
 import AssessmentHeader from './AssessmentHeader';
 import PatientInfoSection from './PatientInfoSection';
@@ -26,6 +27,7 @@ export default function ClinicalForm({ patient, onClose }) {
   });
 
   const [activeStep, setActiveStep] = useState(0);
+  const [saving, setSaving] = useState(false);
 
   const steps = [
     { id: 'assessment', label: 'Initial Assessment', component: AssessmentHeader, isHeader: true },
@@ -41,11 +43,31 @@ export default function ClinicalForm({ patient, onClose }) {
     setFormData(prev => ({ ...prev, ...newData }));
   };
 
-  const handleSave = () => {
-    toast.success('Clinical record saved successfully!');
-    if (onClose) onClose();
-  };
+  const handleSave = async () => {
+    if (!patient?.id) {
+      toast.error('Cannot save: Patient ID is missing');
+      return;
+    }
 
+    setSaving(true);
+    try {
+      const payload = {
+        patient_id: patient.id,
+        assessment_date: new Date().toISOString().split('T')[0],
+        content: formData
+      };
+
+      await api.post('/api/assessments/add.php', payload);
+      toast.success('Clinical record saved to system successfully!');
+      if (onClose) onClose();
+    } catch (error) {
+      console.error('Failed to save assessment:', error);
+      toast.error(error.response?.data?.error || 'Failed to save clinical record. Please try again.');
+    } finally {
+      setSaving(false);
+    }
+  };
+ bitumen
   const handlePrint = () => {
     window.print();
   };
@@ -174,9 +196,18 @@ export default function ClinicalForm({ patient, onClose }) {
             ) : (
               <button 
                 onClick={handleSave}
-                className="bg-green-600 hover:bg-green-700 text-white px-10 py-3 rounded-xl flex items-center gap-2 font-black uppercase tracking-widest text-xs shadow-lg shadow-green-100 transition-all hover:scale-105"
+                disabled={saving}
+                className={`bg-green-600 hover:bg-green-700 text-white px-10 py-3 rounded-xl flex items-center gap-2 font-black uppercase tracking-widest text-xs shadow-lg shadow-green-100 transition-all hover:scale-105 ${saving ? 'opacity-70 cursor-not-allowed' : ''}`}
               >
-                <FiSave className="w-4 h-4" /> Finalize Record
+                {saving ? (
+                  <>
+                    <FiLoader className="w-4 h-4 animate-spin" /> Saving...
+                  </>
+                ) : (
+                  <>
+                    <FiSave className="w-4 h-4" /> Finalize Record
+                  </>
+                )}
               </button>
             )}
           </div>

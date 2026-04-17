@@ -13,6 +13,7 @@ export default function PatientDetails() {
   const [patient, setPatient] = useState(null);
   const [appointments, setAppointments] = useState([]);
   const [reports, setReports] = useState([]);
+  const [assessments, setAssessments] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -24,13 +25,15 @@ export default function PatientDetails() {
         
         if (found) {
           setPatient(found);
-          // Fetch their appointments and reports
-          const [aResp, rResp] = await Promise.all([
+          // Fetch their appointments, reports, and clinical records
+          const [aResp, rResp, cResp] = await Promise.all([
             api.get(`/api/appointments/list.php?patient_id=${id}`),
-            api.get(`/api/reports/list.php?patient_id=${id}`)
+            api.get(`/api/reports/list.php?patient_id=${id}`),
+            api.get(`/api/assessments/list.php?patient_id=${id}`)
           ]);
           setAppointments(aResp.data);
           setReports(rResp.data);
+          setAssessments(cResp.data);
         } else {
           toast.error('Patient not found');
           navigate('/doctor/patients');
@@ -148,6 +151,71 @@ export default function PatientDetails() {
               <FiUpload className="w-4 h-4" /> Upload New Report
             </button>
           </div>
+        </div>
+      </div>
+
+      {/* Clinical Assessment History */}
+      <div className="card">
+        <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <FiActivity className="text-primary-500 w-4 h-4" />
+            <h3 className="section-title">Clinical History</h3>
+          </div>
+          <span className="text-[10px] bg-primary-100 text-primary-700 font-bold px-2 py-0.5 rounded-full uppercase tracking-widest">
+            Stored Records
+          </span>
+        </div>
+        <div className="divide-y divide-slate-50">
+          {assessments.length === 0 ? (
+            <div className="p-10 text-center space-y-3">
+              <div className="w-12 h-12 bg-slate-50 rounded-full flex items-center justify-center mx-auto">
+                 <FiFileText className="text-slate-300 w-6 h-6" />
+              </div>
+              <p className="text-sm text-slate-400 font-medium italic">No previous clinical assessments found for this patient.</p>
+              <button 
+                onClick={() => setShowClinicalForm(true)}
+                className="text-xs text-primary-600 font-bold hover:underline uppercase tracking-widest"
+              >
+                + Create Initial Assessment
+              </button>
+            </div>
+          ) : (
+            assessments.map(ass => (
+              <div key={ass.id} className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-6 py-4 hover:bg-slate-50/50 transition-colors group">
+                <div className="flex items-center gap-4">
+                  <div className="w-10 h-10 bg-primary-50 rounded-xl flex items-center justify-center flex-shrink-0 group-hover:bg-primary-600 group-hover:text-white transition-all text-primary-600 shadow-sm">
+                    <FiCheckCircle className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <div className="font-bold text-slate-800 text-sm">Clinical Assessment</div>
+                    <div className="text-xs text-slate-400 flex items-center gap-2 mt-0.5">
+                      <FiCalendar className="w-3 h-3" />
+                      {new Date(ass.assessment_date).toLocaleDateString('en-AU', { day:'numeric', month:'short', year:'numeric' })}
+                      <span className="w-1 h-1 bg-slate-300 rounded-full" />
+                      Dr. {ass.doctor_name}
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                   <div className="flex flex-wrap gap-2 mr-4">
+                      {ass.content?.painScore !== undefined && (
+                        <span className="text-[9px] font-black p-1 px-2 rounded bg-red-50 text-red-600 uppercase tracking-tighter shadow-sm border border-red-100">
+                          Pain: {ass.content.painScore}/10
+                        </span>
+                      )}
+                      {ass.content?.treatmentPrograms?.slice(0, 1).map(p => (
+                        <span key={p} className="text-[9px] font-black p-1 px-2 rounded bg-blue-50 text-blue-600 uppercase tracking-tighter shadow-sm border border-blue-100">
+                          {p}
+                        </span>
+                      ))}
+                   </div>
+                   <button className="btn-secondary py-1.5 px-3 text-[10px] font-black uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">
+                     View Summary
+                   </button>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
 

@@ -70,8 +70,21 @@ try {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
     )");
     echo "Staff codes table created.\n";
+    
+    // 6. Clinical Assessments Table
+    Database::query("CREATE TABLE IF NOT EXISTS clinical_assessments (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        patient_id INT NOT NULL,
+        doctor_id INT NOT NULL,
+        assessment_date DATE NOT NULL,
+        content LONGTEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (patient_id) REFERENCES users(id) ON DELETE CASCADE,
+        FOREIGN KEY (doctor_id) REFERENCES users(id) ON DELETE CASCADE
+    )");
+    echo "Clinical assessments table created.\n";
 
-    // 6. Seed codes if none exist
+    // 7. Seed codes if none exist
     $codeCount = Database::fetchOne("SELECT COUNT(*) as count FROM staff_codes")['count'];
     if ($codeCount == 0) {
         Database::query("INSERT INTO staff_codes (code, usage_limit) VALUES ('SS-STAFF-2026', 100)");
