@@ -24,6 +24,9 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response && error.response.status === 401) {
+      const isMockToken = localStorage.getItem('token')?.startsWith('mock-');
+      if (isMockToken) return Promise.reject(error);
+      
       localStorage.removeItem('token');
       localStorage.removeItem('user');
       window.location.href = '/login';
