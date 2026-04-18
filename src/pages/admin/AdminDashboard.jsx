@@ -45,7 +45,7 @@ export default function AdminDashboard() {
         setData(response.data);
       } catch (error) {
         console.warn('Backend offline, using mock stats');
-        setData(ADMIN_STATS);
+        setData({ stats: ADMIN_STATS, recentAppointments: [] });
       } finally {
         setLoading(false);
       }
