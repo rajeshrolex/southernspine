@@ -53,6 +53,13 @@ export default function PatientDashboard() {
 
   useEffect(() => {
     const fetchDashboard = async () => {
+      const isMockToken = localStorage.getItem('token')?.startsWith('mock-');
+      if (isMockToken) {
+         setData(PATIENT_DASHBOARD_DATA);
+         setLoading(false);
+         return;
+      }
+
       try {
         const response = await api.get('/api/patient/dashboard.php');
         setData(response.data);

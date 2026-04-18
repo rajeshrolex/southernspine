@@ -14,6 +14,18 @@ export default function DoctorDashboard() {
   const [loading, setLoading] = useState(true);
   useEffect(() => {
     const fetchDashboard = async () => {
+      const isMockToken = localStorage.getItem('token')?.startsWith('mock-');
+      if (isMockToken) {
+        setData({ 
+          appointments: DOCTOR_TODAY_APPOINTMENTS.map(a => ({
+            ...a, patient_name: a.patient, appointment_time: a.time.replace(' AM','').replace(' PM','')
+          })), 
+          stats: DOCTOR_DASHBOARD_STATS 
+        });
+        setLoading(false);
+        return;
+      }
+
       try {
         const response = await api.get('/api/appointments/list.php');
         const appointments = response.data;
