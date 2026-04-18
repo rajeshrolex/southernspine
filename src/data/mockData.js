@@ -167,6 +167,13 @@ export const DOCTOR_TODAY_APPOINTMENTS = [
   { id: 'APT016', patient: 'Barbara Lee',   time: '03:30 PM', type: 'Follow-up Session',    status: 'upcoming', age: 72 },
 ];
 
+export const DOCTOR_DASHBOARD_STATS = {
+  today: 7,
+  completed: 2,
+  upcoming: 4,
+  patients: 12
+};
+
 export const ALL_PATIENTS = [
   { id: 'P001', name: 'Mary Johnson',    age: 54, phone: '+1 (555) 234-5678', email: 'mary@example.com', lastVisit: '2026-03-10', condition: 'Lower Back Pain', doctor: 'Doctor', status: 'active' },
   { id: 'P002', name: 'Robert Davis',    age: 67, phone: '+1 (555) 345-6789', email: 'robert@example.com', lastVisit: '2026-03-09', condition: 'Neck Pain',       doctor: 'Dr. James Lawson',   status: 'active' },
