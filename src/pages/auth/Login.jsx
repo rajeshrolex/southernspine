@@ -23,7 +23,7 @@ export default function Login() {
     setIsSubmitting(false);
 
     if (result.success) {
-      const savedUser = JSON.parse(localStorage.getItem('user'));
+      const savedUser = result.user;
       toast.success('Welcome back!');
       
       if (savedUser.role === ROLES.PATIENT) navigate('/patient/dashboard');
