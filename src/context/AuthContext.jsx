@@ -53,6 +53,19 @@ export function AuthProvider({ children }) {
       // MOCK MODE FALLBACK
       // If the backend is unreachable (network error or 500 error), use local demo accounts
       if (!error.response || error.response.status >= 500 || error.response.status === 404 || error.code === 'ERR_NETWORK') {
+        const existingMocks = JSON.parse(localStorage.getItem('mock_users') || '[]');
+        const customMock = existingMocks.find(u => u.email === email && u.password === password);
+        
+        if (customMock) {
+          console.warn(`[MOCK MODE] Logging in as custom registered mock user: ${customMock.email}`);
+          const { password: _, ...userToSave } = customMock;
+          
+          localStorage.setItem('token', 'mock-offline-token-' + customMock.id);
+          localStorage.setItem('user', JSON.stringify(userToSave));
+          setUser(userToSave);
+          return { success: true, user: userToSave };
+        }
+
         let mockRole = null;
         if (email === 'admin@demo.com' && password === 'test') mockRole = ROLES.ADMIN;
         else if (email === 'doctor@demo.com' && password === 'test') mockRole = ROLES.DOCTOR;

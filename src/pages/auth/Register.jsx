@@ -53,14 +53,22 @@ export default function Register() {
       if (!error.response || error.response.status >= 500 || error.response.status === 404 || error.code === 'ERR_NETWORK') {
         console.warn('[MOCK MODE] Backend offline, registering mock user.');
         const mockUser = {
-          id: 999,
+          id: Date.now(),
           name: form.name || 'Mock User',
           email: form.email,
           role: form.role,
-          status: 'active'
+          status: 'active',
+          password: form.password
         };
-        localStorage.setItem('token', 'mock-register-token');
-        localStorage.setItem('user', JSON.stringify(mockUser));
+        
+        const existingMocks = JSON.parse(localStorage.getItem('mock_users') || '[]');
+        existingMocks.push(mockUser);
+        localStorage.setItem('mock_users', JSON.stringify(existingMocks));
+
+        const { password: _, ...userToSave } = mockUser;
+        localStorage.setItem('token', 'mock-register-token-' + mockUser.id);
+        localStorage.setItem('user', JSON.stringify(userToSave));
+        
         toast.success(`[Mock Mode] Account created for ${form.name}!`);
         window.location.href = form.role === 'patient' ? '/patient/dashboard' : (form.role === 'doctor' ? '/doctor/dashboard' : '/admin/dashboard');
         return;
