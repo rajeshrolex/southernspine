@@ -5,6 +5,7 @@ import api from '../../services/api';
 import { useAuth } from '../../context/AuthContext';
 import { StatsCard, StatusBadge } from '../../components/ui/index';
 import toast from 'react-hot-toast';
+import { PATIENT_DASHBOARD_DATA } from '../../data/mockData';
 
 function UpcomingCard({ appt }) {
   if (!appt) return (
@@ -43,7 +44,6 @@ function UpcomingCard({ appt }) {
   );
 }
 
-import { PATIENT_DASHBOARD_DATA } from '../../data/mockData';
 
 export default function PatientDashboard() {
   const navigate = useNavigate();
