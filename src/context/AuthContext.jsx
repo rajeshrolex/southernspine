@@ -48,13 +48,10 @@ export function AuthProvider({ children }) {
       setUser(userData);
       return { success: true, user: userData };
     } catch (error) {
-      console.error('Login error:', error);
-      
-      // MOCK MODE FALLBACK
-      // If the backend is unreachable (network error or 500 error), use local demo accounts
       if (!error.response || error.response.status >= 500 || error.response.status === 404 || error.code === 'ERR_NETWORK') {
         const existingMocks = JSON.parse(localStorage.getItem('mock_users') || '[]');
-        const customMock = existingMocks.find(u => u.email === email && u.password === password);
+        const safeEmail = email.trim().toLowerCase();
+        const customMock = existingMocks.find(u => u.email.trim().toLowerCase() === safeEmail && u.password === password);
         
         if (customMock) {
           console.warn(`[MOCK MODE] Logging in as custom registered mock user: ${customMock.email}`);
@@ -67,21 +64,20 @@ export function AuthProvider({ children }) {
         }
 
         let mockRole = null;
-        if (email === 'admin@demo.com' && password === 'test') mockRole = ROLES.ADMIN;
-        else if (email === 'doctor@demo.com' && password === 'test') mockRole = ROLES.DOCTOR;
-        else if (email === 'patient@demo.com' && password === 'test') mockRole = ROLES.PATIENT;
+        if (safeEmail === 'admin@demo.com' && password === 'test') mockRole = ROLES.ADMIN;
+        else if (safeEmail === 'doctor@demo.com' && password === 'test') mockRole = ROLES.DOCTOR;
+        else if (safeEmail === 'patient@demo.com' && password === 'test') mockRole = ROLES.PATIENT;
 
         if (mockRole) {
           console.warn(`[MOCK MODE] Logging in as ${mockRole} due to backend unavailability.`);
           const mockUser = {
-            id: email === 'doctor@demo.com' ? 1 : (email === 'patient@demo.com' ? 3 : 99),
+            id: safeEmail === 'doctor@demo.com' ? 1 : (safeEmail === 'patient@demo.com' ? 3 : 99),
             name: mockRole === ROLES.ADMIN ? 'System Admin' : (mockRole === ROLES.DOCTOR ? 'Dr. Sarah Jenkins' : 'Michael Scott'),
-            email,
+            email: safeEmail,
             role: mockRole,
             status: 'active'
           };
-          const mockToken = 'mock-offline-token-12345';
-          localStorage.setItem('token', mockToken);
+          localStorage.setItem('token', 'mock-offline-token-12345');
           localStorage.setItem('user', JSON.stringify(mockUser));
           setUser(mockUser);
           
