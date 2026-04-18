@@ -146,6 +146,17 @@ export const PATIENT_REPORTS = [
   },
 ];
 
+export const PATIENT_DASHBOARD_DATA = {
+  stats: {
+    upcoming: 2,
+    completed: 2,
+    reports: 3,
+    total: 4,
+  },
+  appointments: PATIENT_APPOINTMENTS,
+  reports: PATIENT_REPORTS,
+};
+
 export const DOCTOR_TODAY_APPOINTMENTS = [
   { id: 'APT010', patient: 'Mary Johnson', time: '09:00 AM', type: 'Initial Consultation', status: 'completed', age: 54 },
   { id: 'APT011', patient: 'Robert Davis',  time: '09:30 AM', type: 'Follow-up Session',    status: 'completed', age: 67 },
