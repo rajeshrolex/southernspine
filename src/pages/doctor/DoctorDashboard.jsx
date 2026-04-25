@@ -27,17 +27,8 @@ export default function DoctorDashboard() {
       }
 
       try {
-        const response = await api.get('/api/appointments/list.php');
-        const appointments = response.data;
-        
-        const stats = {
-          today: appointments.length,
-          completed: appointments.filter(a => a.status === 'completed').length,
-          upcoming: appointments.filter(a => a.status === 'upcoming').length,
-          patients: new Set(appointments.map(a => a.patient_id)).size
-        };
-
-        setData({ appointments, stats });
+        const response = await api.get('/api/doctors/dashboard.php');
+        setData(response.data);
       } catch (error) {
         console.warn('Backend offline, using mock doctor dashboard data');
         setData({ 

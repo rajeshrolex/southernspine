@@ -40,14 +40,6 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     const fetchAdminData = async () => {
-      // If we are already running in Mock Mode, bypass the offline server entirely to hide 404 console errors
-      const isMockToken = localStorage.getItem('token')?.startsWith('mock-');
-      if (isMockToken) {
-         setData({ stats: ADMIN_STATS, recentAppointments: [] });
-         setLoading(false);
-         return;
-      }
-
       try {
         const response = await api.get('/api/admin/stats.php');
         setData(response.data);

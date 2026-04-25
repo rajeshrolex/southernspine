@@ -36,6 +36,8 @@ export default function Register() {
         name: form.name,
         email: form.email,
         phone: form.phone,
+        dob: form.dob,
+        gender: form.gender,
         password: form.password,
         role: form.role,
         authorization_code: form.authorization_code
@@ -150,17 +152,17 @@ export default function Register() {
                   <label className="label-lg">Phone Number</label>
                   <div className="relative">
                     <FiPhone className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
-                    <input className="input pl-12" type="tel" placeholder="+61 400 000 000" value={form.phone} onChange={e => update('phone', e.target.value)} />
+                    <input className="input pl-12" type="tel" placeholder="+61 400 000 000" value={form.phone} onChange={e => update('phone', e.target.value)} required />
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="label-lg">Date of Birth</label>
-                    <input className="input" type="date" value={form.dob} onChange={e => update('dob', e.target.value)} />
+                    <input className="input" type="date" value={form.dob} onChange={e => update('dob', e.target.value)} required />
                   </div>
                   <div>
                     <label className="label-lg">Gender</label>
-                    <select className="input" value={form.gender} onChange={e => update('gender', e.target.value)}>
+                    <select className="input" value={form.gender} onChange={e => update('gender', e.target.value)} required>
                       <option value="">Select</option>
                       <option>Male</option>
                       <option>Female</option>

@@ -1,13 +1,18 @@
 import React, { useState } from 'react';
-import { FiUser, FiMail, FiPhone, FiCalendar, FiMapPin, FiEdit2, FiSave, FiX } from 'react-icons/fi';
+import { FiUser, FiMail, FiPhone, FiCalendar, FiMapPin, FiEdit2, FiSave, FiX, FiLock } from 'react-icons/fi';
 import { useAuth } from '../../context/AuthContext';
 import { PageHeader } from '../../components/ui/index';
+import api from '../../services/api';
 import toast from 'react-hot-toast';
 
 export default function Profile() {
   const { user } = useAuth();
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState(user || {});
+  
+  const [showPasswordForm, setShowPasswordForm] = useState(false);
+  const [passForm, setPassForm] = useState({ old_password: '', new_password: '' });
+  const [isChangingPass, setIsChangingPass] = useState(false);
 
   const update = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
@@ -32,6 +37,29 @@ export default function Profile() {
       )}
     </div>
   );
+
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+    if (!passForm.old_password || !passForm.new_password) {
+      toast.error('Please fill in both fields');
+      return;
+    }
+    if (passForm.new_password.length < 6) {
+      toast.error('New password must be at least 6 characters');
+      return;
+    }
+    setIsChangingPass(true);
+    try {
+      await api.post('/auth/change_password.php', passForm);
+      toast.success('Password updated successfully!');
+      setShowPasswordForm(false);
+      setPassForm({ old_password: '', new_password: '' });
+    } catch (error) {
+      toast.error(error.response?.data?.error || 'Failed to update password');
+    } finally {
+      setIsChangingPass(false);
+    }
+  };
 
   if (!user) return <div className="p-8 text-center">Loading profile...</div>;
 
@@ -81,8 +109,42 @@ export default function Profile() {
       {/* Security */}
       <div className="card p-6 space-y-4">
         <h3 className="section-title border-b border-slate-100 pb-3">Account Actions</h3>
-        <button className="btn-outline w-full" onClick={() => toast.error('Change password module coming soon')}>Change Password</button>
-        <button className="btn-outline w-full text-red-500 border-red-200 hover:bg-red-50" onClick={() => toast.error('Please contact admin to delete account')}>Delete Account</button>
+        
+        {showPasswordForm ? (
+          <form onSubmit={handleChangePassword} className="space-y-4 bg-slate-50 p-4 rounded-xl border border-slate-200">
+            <div>
+              <label className="label text-sm">Old Password</label>
+              <input
+                type="password"
+                className="input"
+                value={passForm.old_password}
+                onChange={e => setPassForm({...passForm, old_password: e.target.value})}
+                required
+              />
+            </div>
+            <div>
+              <label className="label text-sm">New Password</label>
+              <input
+                type="password"
+                className="input"
+                value={passForm.new_password}
+                onChange={e => setPassForm({...passForm, new_password: e.target.value})}
+                required
+              />
+            </div>
+            <div className="flex gap-2">
+              <button type="submit" disabled={isChangingPass} className="btn-primary flex-1">
+                {isChangingPass ? 'Updating...' : 'Update Password'}
+              </button>
+              <button type="button" onClick={() => setShowPasswordForm(false)} className="btn-outline">
+                Cancel
+              </button>
+            </div>
+          </form>
+        ) : (
+          <button className="btn-outline w-full" onClick={() => setShowPasswordForm(true)}>Change Password</button>
+        )}
+        
       </div>
     </div>
   );

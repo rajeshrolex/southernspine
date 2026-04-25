@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { FiSearch, FiDownload, FiUserPlus, FiEye } from 'react-icons/fi';
 import api from '../../services/api';
 import { PageHeader, StatusBadge } from '../../components/ui/index';
 import toast from 'react-hot-toast';
 
 export default function AdminPatients() {
+  const navigate = useNavigate();
   const [patients, setPatients] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -102,7 +104,7 @@ export default function AdminPatients() {
                     {new Date(p.created_at).toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'})}
                   </td>
                   <td className="table-cell">
-                    <button onClick={() => toast.success(`Accessing profile for ${p.name}`)} className="p-1.5 rounded-lg text-primary-600 hover:bg-primary-50 transition-colors">
+                    <button onClick={() => navigate(`/admin/patient-details/${p.id}`)} className="p-1.5 rounded-lg text-primary-600 hover:bg-primary-50 transition-colors">
                       <FiEye className="w-4 h-4" />
                     </button>
                   </td>

@@ -42,17 +42,23 @@ export default function UploadReport() {
     
     setIsUploading(true);
     try {
-      // In a real app: 
-      // const formData = new FormData();
-      // formData.append('file', file);
-      // await api.post('/api/reports/upload.php', formData);
+      const formData = new FormData();
+      formData.append('patient_id', form.patient);
+      formData.append('title', form.title);
+      formData.append('category', form.category);
+      formData.append('notes', form.notes);
+      if (file) {
+        formData.append('file', file);
+      }
       
-      // Simulated upload delay
-      await new Promise(r => setTimeout(r, 1500));
+      await api.post('/api/reports/upload.php', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      
       setSubmitted(true);
       toast.success('Report attached to patient record!');
     } catch (error) {
-      toast.error('Upload failed');
+      toast.error(error.response?.data?.error || 'Upload failed');
     } finally {
       setIsUploading(false);
     }

@@ -8,11 +8,12 @@ import toast from 'react-hot-toast';
 import { PATIENT_DASHBOARD_DATA } from '../../data/mockData';
 
 function UpcomingCard({ appt }) {
+  const navigate = useNavigate();
   if (!appt) return (
     <div className="card p-6 bg-slate-50 border-dashed flex flex-col items-center justify-center text-center">
       <FiCalendar className="w-10 h-10 text-slate-300 mb-2" />
       <p className="text-slate-500 font-medium">No upcoming appointments</p>
-      <button className="text-primary-600 text-sm font-bold mt-2 hover:underline">Book one now</button>
+      <button onClick={() => navigate('/patient/book-appointment')} className="text-primary-600 text-sm font-bold mt-2 hover:underline">Book one now</button>
     </div>
   );
   
@@ -53,19 +54,11 @@ export default function PatientDashboard() {
 
   useEffect(() => {
     const fetchDashboard = async () => {
-      const isMockToken = localStorage.getItem('token')?.startsWith('mock-');
-      if (isMockToken) {
-         setData(PATIENT_DASHBOARD_DATA);
-         setLoading(false);
-         return;
-      }
-
       try {
         const response = await api.get('/api/patient/dashboard.php');
         setData(response.data);
       } catch (error) {
-        console.warn('Backend offline, using mock patient dashboard data');
-        setData(PATIENT_DASHBOARD_DATA);
+        console.error('Error fetching dashboard:', error);
       } finally {
         setLoading(false);
       }

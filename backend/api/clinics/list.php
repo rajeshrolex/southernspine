@@ -13,10 +13,13 @@ if (!$user) {
 }
 
 try {
-    $clinics = Database::fetchAll("SELECT * FROM clinics ORDER BY name ASC");
+    $query = "SELECT c.*, 
+              (SELECT COUNT(*) FROM users u WHERE u.clinic_id = c.id AND u.role = 'doctor') as doctor_count,
+              (SELECT COUNT(*) FROM users u WHERE u.clinic_id = c.id AND u.role = 'patient') as patient_count
+              FROM clinics c 
+              ORDER BY c.name ASC";
     
-    // In a real app, we'd join with doctors/patients to get counts
-    // For now, let's just return the clinics.
+    $clinics = Database::fetchAll($query);
     echo json_encode($clinics);
 
 } catch (Exception $e) {

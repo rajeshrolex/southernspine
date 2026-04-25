@@ -25,8 +25,22 @@ export default function Clinics() {
     }
   };
 
-  const handleAdd = () => {
-    toast.error('Direct clinic creation is currently disabled for security');
+  const handleAdd = async (e) => {
+    e.preventDefault();
+    if (!form.name || !form.address) {
+      toast.error('Name and address are required');
+      return;
+    }
+    
+    try {
+      await api.post('/api/clinics/create.php', form);
+      toast.success('Clinic added successfully!');
+      setModalOpen(false);
+      setForm({ name: '', address: '', phone: '' });
+      fetchClinics();
+    } catch (error) {
+      toast.error(error.response?.data?.error || 'Failed to add clinic');
+    }
   };
 
   const handleDelete = (id) => {
@@ -80,13 +94,24 @@ export default function Clinics() {
       </div>
 
       <Modal open={modalOpen} onClose={() => setModalOpen(false)} title="Add New Clinic">
-        <div className="space-y-4">
-          <p className="text-sm text-slate-500 bg-blue-50 p-3 rounded-xl border border-blue-100">⚠️ New clinic registration requires regional verification.</p>
-          <div className="flex gap-3">
-            <button onClick={() => setModalOpen(false)} className="btn-outline flex-1">Cancel</button>
-            <button onClick={handleAdd} className="btn-primary flex-1">Submit Request</button>
+        <form onSubmit={handleAdd} className="space-y-4">
+          <div>
+            <label className="label text-sm">Clinic Name *</label>
+            <input className="input" value={form.name} onChange={e => setForm({...form, name: e.target.value})} required />
           </div>
-        </div>
+          <div>
+            <label className="label text-sm">Address *</label>
+            <input className="input" value={form.address} onChange={e => setForm({...form, address: e.target.value})} required />
+          </div>
+          <div>
+            <label className="label text-sm">Phone</label>
+            <input className="input" type="tel" value={form.phone} onChange={e => setForm({...form, phone: e.target.value})} />
+          </div>
+          <div className="flex gap-3 pt-2">
+            <button type="button" onClick={() => setModalOpen(false)} className="btn-outline flex-1">Cancel</button>
+            <button type="submit" className="btn-primary flex-1">Create Clinic</button>
+          </div>
+        </form>
       </Modal>
     </div>
   );

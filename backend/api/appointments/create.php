@@ -22,6 +22,7 @@ try {
     $data = json_decode(file_get_contents('php://input'), true);
     
     $patient_id = $user['userId'];
+    $doctor_id = $data['doctor_id'] ?? null;
     $doctor_name = $data['doctor_name'] ?? '';
     $specialty = $data['specialty'] ?? '';
     $date = $data['date'] ?? '';
@@ -36,10 +37,10 @@ try {
         exit();
     }
 
-    $query = "INSERT INTO appointments (patient_id, doctor_name, specialty, appointment_date, appointment_time, type, status, location, notes) 
-              VALUES (?, ?, ?, ?, ?, ?, 'upcoming', ?, ?)";
+    $query = "INSERT INTO appointments (patient_id, doctor_id, doctor_name, specialty, appointment_date, appointment_time, type, status, location, notes) 
+              VALUES (?, ?, ?, ?, ?, ?, ?, 'upcoming', ?, ?)";
     
-    Database::query($query, [$patient_id, $doctor_name, $specialty, $date, $time, $type, $location, $notes]);
+    Database::query($query, [$patient_id, $doctor_id, $doctor_name, $specialty, $date, $time, $type, $location, $notes]);
 
     echo json_encode([
         'message' => 'Appointment booked successfully',

@@ -1,5 +1,5 @@
 import React from 'react';
-import { FiBell, FiSearch, FiMenu } from 'react-icons/fi';
+import { FiSearch, FiMenu } from 'react-icons/fi';
 import { useAuth } from '../../context/AuthContext';
 
 export default function Topbar({ title, subtitle, onMenuClick }) {
@@ -32,11 +32,6 @@ export default function Topbar({ title, subtitle, onMenuClick }) {
         />
       </div>
 
-      {/* Notification bell */}
-      <button className="relative p-2.5 rounded-xl text-slate-500 hover:text-slate-700 hover:bg-slate-100 transition-colors flex-shrink-0">
-        <FiBell className="w-5 h-5" />
-        <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full" />
-      </button>
 
       {/* Avatar */}
       <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full ${user?.color || 'bg-primary-500'} flex items-center justify-center text-white text-xs sm:text-sm font-bold flex-shrink-0 cursor-pointer`}>

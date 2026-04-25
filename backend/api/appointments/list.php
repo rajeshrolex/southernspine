@@ -24,6 +24,9 @@ try {
     if ($role === 'patient') {
         $conditions[] = "patient_id = ?";
         $params[] = $userId;
+    } else if ($role === 'doctor') {
+        $conditions[] = "doctor_id = ?";
+        $params[] = $userId;
     }
 
     if ($status) {

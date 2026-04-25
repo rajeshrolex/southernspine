@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { FiArrowLeft, FiPhone, FiMail, FiCalendar, FiFileText, FiUpload, FiActivity } from 'react-icons/fi';
+import { FiArrowLeft, FiPhone, FiMail, FiCalendar, FiFileText, FiUpload, FiActivity, FiCheckCircle, FiX } from 'react-icons/fi';
 import api from '../../services/api';
 import { StatusBadge } from '../../components/ui/index';
 import ClinicalForm from '../../components/forms/ClinicalForm';
@@ -14,6 +14,7 @@ export default function PatientDetails() {
   const [appointments, setAppointments] = useState([]);
   const [reports, setReports] = useState([]);
   const [assessments, setAssessments] = useState([]);
+  const [selectedAssessment, setSelectedAssessment] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -36,7 +37,9 @@ export default function PatientDetails() {
           setAssessments(cResp.data);
         } else {
           toast.error('Patient not found');
-          navigate('/doctor/patients');
+          const user = JSON.parse(localStorage.getItem('user'));
+          if (user?.role === 'admin') navigate('/admin/patients');
+          else navigate('/doctor/patients');
         }
       } catch (error) {
         toast.error('Failed to load patient details');
@@ -58,8 +61,75 @@ export default function PatientDetails() {
           onClose={() => setShowClinicalForm(false)} 
         />
       )}
+
+      {/* Assessment Summary Modal */}
+      {selectedAssessment && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fade-in">
+          <div className="bg-white rounded-3xl w-full max-w-2xl max-h-[85vh] overflow-hidden flex flex-col shadow-2xl animate-scale-in">
+            <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+              <div>
+                <h3 className="text-lg font-black text-slate-900 uppercase tracking-tight">Assessment Summary</h3>
+                <p className="text-xs font-bold text-slate-400 mt-0.5 uppercase tracking-widest">
+                  Recorded on {new Date(selectedAssessment.assessment_date).toLocaleDateString('en-AU', { day:'numeric', month:'short', year:'numeric' })}
+                </p>
+              </div>
+              <button onClick={() => setSelectedAssessment(null)} className="p-2 hover:bg-slate-200 rounded-xl transition-colors">
+                <FiX className="w-5 h-5 text-slate-500" />
+              </button>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="p-4 bg-slate-50 rounded-2xl">
+                  <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Therapist</div>
+                  <div className="font-bold text-slate-800">Dr. {selectedAssessment.doctor_name}</div>
+                </div>
+                <div className="p-4 bg-primary-50 rounded-2xl">
+                  <div className="text-[10px] font-black text-primary-400 uppercase tracking-widest mb-1">Pain Level</div>
+                  <div className="font-black text-primary-700 text-xl">{selectedAssessment.content?.painScore || 'N/A'}/10</div>
+                </div>
+              </div>
+
+              {selectedAssessment.content?.sessions?.some(s => s.complaints) && (
+                <div className="space-y-3">
+                  <h4 className="text-xs font-black text-slate-900 uppercase tracking-widest">Clinical Observations</h4>
+                  <div className="space-y-2">
+                    {selectedAssessment.content.sessions.filter(s => s.complaints).map((s, i) => (
+                      <div key={i} className="p-4 border border-slate-100 rounded-2xl text-sm">
+                        <div className="font-bold text-slate-700 mb-1">Session {s.id}</div>
+                        <p className="text-slate-600 italic">"{s.complaints}"</p>
+                        {s.treatments?.length > 0 && (
+                          <div className="flex flex-wrap gap-2 mt-2">
+                            {s.treatments.map(t => (
+                              <span key={t} className="px-2 py-0.5 bg-slate-100 text-slate-500 rounded text-[10px] font-bold uppercase">{t}</span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="p-6 border-t border-slate-100 bg-slate-50/50 flex justify-end">
+              <button onClick={() => setSelectedAssessment(null)} className="btn-primary py-2.5 px-8 text-xs font-black uppercase tracking-widest">
+                Close Dossier
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Back */}
-      <button onClick={() => navigate('/doctor/patients')} className="flex items-center gap-2 text-slate-600 hover:text-primary-600 font-medium transition-colors">
+      <button 
+        onClick={() => {
+          const user = JSON.parse(localStorage.getItem('user'));
+          if (user?.role === 'admin') navigate('/admin/patients');
+          else navigate('/doctor/patients');
+        }} 
+        className="flex items-center gap-2 text-slate-600 hover:text-primary-600 font-medium transition-colors"
+      >
         <FiArrowLeft className="w-5 h-5" /> Back to Patients
       </button>
 
@@ -142,7 +212,18 @@ export default function PatientDetails() {
                   <div className="text-sm font-semibold text-slate-800 truncate">{r.title}</div>
                   <div className="text-xs text-slate-400">{r.category} · {r.size || 'N/A'}</div>
                 </div>
-                <button className="text-xs text-primary-600 font-semibold hover:underline">View</button>
+                <button 
+                  onClick={() => {
+                    if (r.file_path) {
+                      window.open(`http://localhost:8000/${r.file_path}`, '_blank');
+                    } else {
+                      toast.error('Report file not found');
+                    }
+                  }} 
+                  className="text-xs text-primary-600 font-semibold hover:underline"
+                >
+                  View
+                </button>
               </div>
             ))}
           </div>
@@ -209,7 +290,10 @@ export default function PatientDetails() {
                         </span>
                       ))}
                    </div>
-                   <button className="btn-secondary py-1.5 px-3 text-[10px] font-black uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">
+                   <button 
+                    onClick={() => setSelectedAssessment(ass)}
+                    className="btn-secondary py-1.5 px-3 text-[10px] font-black uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity"
+                   >
                      View Summary
                    </button>
                 </div>

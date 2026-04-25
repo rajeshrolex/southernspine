@@ -18,8 +18,11 @@ $email = $data['email'] ?? '';
 $password = $data['password'] ?? '';
 $role = $data['role'] ?? 'patient';
 $authCode = $data['authorization_code'] ?? '';
+$phone = $data['phone'] ?? '';
+$dob = $data['dob'] ?? null;
+$gender = $data['gender'] ?? '';
 
-if (empty($name) || empty($email) || empty($password)) {
+if (empty($name) || empty($email) || empty($password) || empty($phone) || empty($dob) || empty($gender)) {
     http_response_code(400);
     echo json_encode(['error' => 'All fields are required']);
     exit();
@@ -62,8 +65,8 @@ try {
 
     // Insert user
     Database::query(
-        "INSERT INTO users (name, email, password, role) VALUES (?, ?, ?, ?)",
-        [$name, $email, $hashedPassword, $role]
+        "INSERT INTO users (name, email, password, role, phone, dob, gender) VALUES (?, ?, ?, ?, ?, ?, ?)",
+        [$name, $email, $hashedPassword, $role, $phone, $dob, $gender]
     );
 
     $user_id = Database::getInstance()->lastInsertId();
@@ -79,7 +82,10 @@ try {
             'id' => $user_id,
             'name' => $name,
             'email' => $email,
-            'role' => $role
+            'role' => $role,
+            'phone' => $phone,
+            'dob' => $dob,
+            'gender' => $gender
         ]
     ]);
 

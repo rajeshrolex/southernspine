@@ -68,6 +68,7 @@ export default function BookAppointment() {
     setIsSubmitting(true);
     try {
       await api.post('/api/appointments/create.php', {
+        doctor_id: selected.doctor.id,
         doctor_name: selected.doctor.name,
         specialty: selected.doctor.specialty,
         date: selected.date,

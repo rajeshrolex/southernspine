@@ -47,7 +47,7 @@ export default function Sidebar({ mobileOpen, onClose }) {
     user?.role === 'doctor'  ? 'Doctor Portal'  : 
     'Admin Panel';
 
-  const handleLogout = () => { logout(); navigate('/login'); };
+  const handleLogout = () => { logout(); navigate('/login', { replace: true }); };
 
   const SidebarContent = () => (
     <div className="flex flex-col h-full bg-white">

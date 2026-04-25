@@ -46,7 +46,9 @@ try {
             'name' => $user['name'],
             'email' => $user['email'],
             'role' => $user['role'],
-            'phone' => $user['phone']
+            'phone' => $user['phone'],
+            'dob' => $user['dob'],
+            'gender' => $user['gender']
         ]
     ]);
 

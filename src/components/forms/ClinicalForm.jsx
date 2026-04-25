@@ -67,7 +67,7 @@ export default function ClinicalForm({ patient, onClose }) {
       setSaving(false);
     }
   };
- bitumen
+
   const handlePrint = () => {
     window.print();
   };

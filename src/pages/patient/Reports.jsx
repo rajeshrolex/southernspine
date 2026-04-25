@@ -32,9 +32,23 @@ export default function Reports() {
     }
   };
 
-  const handleFile = (file) => {
+  const handleFile = async (file) => {
     if (!file) return;
-    toast.error('Cloud storage configuration pending – contact staff for uploads');
+    
+    const toastId = toast.loading('Uploading report...');
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      await api.post('/api/reports/upload.php', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' }
+      });
+      
+      toast.success('Report uploaded successfully', { id: toastId });
+      fetchReports(); // Refresh the list
+    } catch (error) {
+      toast.error(error.response?.data?.error || 'Upload failed', { id: toastId });
+    }
   };
 
   const handleDrop = (e) => {
@@ -116,13 +130,30 @@ export default function Reports() {
                 </div>
                 <div className="flex gap-2 mt-1">
                   <button
-                    onClick={() => toast.success('Downloading...')}
+                    onClick={() => {
+                      if (report.file_path) {
+                        const link = document.createElement('a');
+                        link.href = `http://localhost:8000/${report.file_path}`;
+                        link.download = report.title;
+                        document.body.appendChild(link);
+                        link.click();
+                        document.body.removeChild(link);
+                      } else {
+                        toast.error('File not found');
+                      }
+                    }}
                     className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl bg-primary-50 text-primary-700 text-xs font-semibold hover:bg-primary-100 transition-colors"
                   >
                     <FiDownload className="w-3.5 h-3.5" /> Download
                   </button>
                   <button
-                    onClick={() => toast.success('Opening preview...')}
+                    onClick={() => {
+                      if (report.file_path) {
+                        window.open(`http://localhost:8000/${report.file_path}`, '_blank');
+                      } else {
+                        toast.error('File not found');
+                      }
+                    }}
                     className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl bg-slate-50 text-slate-600 text-xs font-semibold hover:bg-slate-100 transition-colors"
                   >
                     <FiEye className="w-3.5 h-3.5" /> View

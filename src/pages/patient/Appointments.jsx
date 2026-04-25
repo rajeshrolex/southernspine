@@ -11,6 +11,7 @@ export default function Appointments() {
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
   const [search, setSearch] = useState('');
+  const [cancellingId, setCancellingId] = useState(null);
 
   useEffect(() => {
     const fetchAppointments = async () => {
@@ -25,6 +26,20 @@ export default function Appointments() {
     };
     fetchAppointments();
   }, []);
+
+  const handleCancel = async (appt) => {
+    if (!window.confirm(`Cancel your "${appt.type}" appointment on ${new Date(appt.appointment_date).toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'long' })}?`)) return;
+    setCancellingId(appt.id);
+    try {
+      await api.post('/api/appointments/cancel.php', { id: appt.id });
+      setAppointments(prev => prev.map(a => a.id === appt.id ? { ...a, status: 'cancelled' } : a));
+      toast.success('Appointment cancelled successfully');
+    } catch (error) {
+      toast.error(error.response?.data?.error || 'Failed to cancel appointment');
+    } finally {
+      setCancellingId(null);
+    }
+  };
 
   const filtered = appointments.filter(a => {
     const matchStatus = filter === 'all' || a.status === filter;
@@ -104,8 +119,12 @@ export default function Appointments() {
               </div>
               <div className="flex-shrink-0">
                 {appt.status === 'upcoming' && (
-                  <button className="btn-outline text-sm py-2 px-4 text-red-500 border-red-200 hover:bg-red-50">
-                    Cancel
+                  <button
+                    onClick={() => handleCancel(appt)}
+                    disabled={cancellingId === appt.id}
+                    className="btn-outline text-sm py-2 px-4 text-red-500 border-red-200 hover:bg-red-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {cancellingId === appt.id ? 'Cancelling...' : 'Cancel'}
                   </button>
                 )}
                 {appt.status === 'completed' && (

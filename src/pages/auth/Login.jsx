@@ -8,11 +8,13 @@ export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState('');
   const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
     e.preventDefault();
+    setError('');
     if (!email || !password) {
       toast.error('Please enter your credentials');
       return;
@@ -30,7 +32,7 @@ export default function Login() {
       else if (savedUser.role === ROLES.DOCTOR) navigate('/doctor/dashboard');
       else navigate('/admin/dashboard');
     } else {
-      toast.error(result.message);
+      setError(result.message || 'Invalid credentials. Please try again.');
     }
   };
 
@@ -87,6 +89,11 @@ export default function Login() {
           </div>
 
           <form onSubmit={handleLogin} className="space-y-5">
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-xl text-sm animate-fade-in-up">
+                {error}
+              </div>
+            )}
             <div>
               <label className="label-lg">Email Address</label>
               <div className="relative">
