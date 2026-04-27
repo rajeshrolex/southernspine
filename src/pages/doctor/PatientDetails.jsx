@@ -215,7 +215,8 @@ export default function PatientDetails() {
                 <button 
                   onClick={() => {
                     if (r.file_path) {
-                      window.open(`http://localhost:8000/${r.file_path}`, '_blank');
+                      const url = `${api.defaults.baseURL}/${r.file_path}`;
+                      window.open(url, '_blank');
                     } else {
                       toast.error('Report file not found');
                     }

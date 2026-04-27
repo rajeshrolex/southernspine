@@ -133,7 +133,8 @@ export default function Reports() {
                     onClick={() => {
                       if (report.file_path) {
                         const link = document.createElement('a');
-                        link.href = `http://localhost:8000/${report.file_path}`;
+                        const url = `${api.defaults.baseURL}/${report.file_path}`;
+                        link.href = url;
                         link.download = report.title;
                         document.body.appendChild(link);
                         link.click();
@@ -149,7 +150,8 @@ export default function Reports() {
                   <button
                     onClick={() => {
                       if (report.file_path) {
-                        window.open(`http://localhost:8000/${report.file_path}`, '_blank');
+                        const url = `${api.defaults.baseURL}/${report.file_path}`;
+                        window.open(url, '_blank');
                       } else {
                         toast.error('File not found');
                       }
