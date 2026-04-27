@@ -77,8 +77,8 @@ jobs:
           cat > .env << 'ENVEOF'
           DB_HOST=localhost
           DB_PORT=3306
-          DB_NAME=u882069120_southernspine
-          DB_USER=u882069120_southernspine
+          DB_NAME=u882069120_spans
+          DB_USER=u882069120_spans
           DB_PASS=Sandanithin@2026
           APP_ENV=production
           BASE_URL=https://u882069120.green-starling-853859.hostingersite.com

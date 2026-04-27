@@ -4,7 +4,11 @@ require_once __DIR__ . '/../vendor/autoload.php';
 use Dotenv\Dotenv;
 
 // Load environment variables
-$dotenv = Dotenv::createUnsafeMutable(__DIR__ . '/../');
+if (file_exists(__DIR__ . '/../.env.production')) {
+    $dotenv = Dotenv::createUnsafeMutable(__DIR__ . '/../', '.env.production');
+} else {
+    $dotenv = Dotenv::createUnsafeMutable(__DIR__ . '/../');
+}
 $dotenv->load();
 
 // Generic configuration access
